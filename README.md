@@ -27,10 +27,7 @@ PUBLIC_KEY=...
 ```
 $ substreams-sink-websockets --help
 
-Usage: substreams-sink-websockets run [options]
-
-Substreams Sink WebSockets
-...
+TO-DO...
 ```
 
 ## Features
