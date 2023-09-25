@@ -3,6 +3,9 @@ import { PORT, PUBLIC_KEY } from "./src/config.js";
 import { verify } from "./src/verify.js";
 import { banner } from "./src/banner.js";
 
+console.log(`Server listening on PORT http://localhost:${PORT}`);
+console.log("Verifying with PUBLIC_KEY", PUBLIC_KEY);
+
 Bun.serve({
   port: PORT,
   async fetch(req: Request, server: Server) {
