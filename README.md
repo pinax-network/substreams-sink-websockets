@@ -1,15 +1,46 @@
-# websockets
+# [`Substreams`](https://substreams.streamingfast.io/) Sink WebSockets
 
-To install dependencies:
+> `substreams-sink-websockets` is a tool that allows developers to pipe data extracted from a blockchain to WebSockets.
 
-```bash
-bun install
-```
-
-To run:
+## Quickstart
 
 ```bash
-bun run index.ts
+$ bun install
+$ bun run dev
 ```
 
-This project was created using `bun init` in bun v1.0.1. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+## 📖 References
+
+- [**Substreams** documentation](https://substreams.streamingfast.io/)
+- [Bun WebSockets](https://bun.sh/docs/api/websockets)
+
+
+## `.env` Environment variables
+
+```env
+PORT=3000
+PUBLIC_KEY=...
+```
+
+## Help
+
+```
+$ substreams-sink-websockets --help
+
+Usage: substreams-sink-websockets run [options]
+
+Substreams Sink WebSockets
+...
+```
+
+## Features
+
+- [x] Accept Substreams Webhook message `POST /`
+- [ ] Client connect to WebSocket service
+- [x] Verify tweetnacl Substreams Webhook message
+- [ ] Send WebSocket messages
+- [ ] Unit testing
+- [ ] Prometheus Metrics `GET /metrics`
+- [ ] Health check `GET /health`
+- [x] Banner `GET /`
+- [ ] Commander CLI

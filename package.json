@@ -1,14 +1,21 @@
 {
-  "name": "websockets",
-  "module": "index.ts",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Substreams Service Websockets",
+  "name": "substreams-service-websockets",
   "type": "module",
   "scripts": {
-    "start": "bun run index.ts"
+    "start": "bun run index.ts",
+    "test": "bun test",
+    "build": "bun build --compile ./index.ts --outfile substreams-service-websockets",
+    "dev": "bun run --watch index.ts"
+  },
+  "dependencies": {
+    "dotenv": "latest",
+    "tweetnacl": "latest"
   },
   "devDependencies": {
-    "bun-types": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
+    "bun-types": "latest",
+    "typescript": "latest"
   }
 }
