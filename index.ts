@@ -3,14 +3,14 @@ import { PORT, PUBLIC_KEY } from "./src/config.js";
 import { verify } from "./src/verify.js";
 import { banner } from "./src/banner.js";
 
-const server = Bun.serve({
+Bun.serve({
   port: PORT,
   async fetch(req: Request, server: Server) {
     if ( req.method == "GET" ) {
       const { pathname } = new URL(req.url);
-      if ( pathname == "/health") return new Response("OK");
-      if ( pathname == "/metrics") return new Response("TO-DO Prometheus metrics");
-      if ( pathname == "/") return new Response(banner())
+      if ( pathname === "/") return new Response(banner())
+      if ( pathname === "/health") return new Response("OK");
+      if ( pathname === "/metrics") return new Response("TO-DO Prometheus metrics");
       return new Response("Not found", { status: 404 });
     }
 
@@ -52,4 +52,3 @@ const server = Bun.serve({
     },
   },
 });
-export default server;
