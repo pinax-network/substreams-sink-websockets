@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "dotenv": "latest",
+    "prom-client": "^14.2.0",
     "tweetnacl": "latest"
   },
   "devDependencies": {

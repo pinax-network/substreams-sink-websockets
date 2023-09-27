@@ -49,7 +49,7 @@ Bun.serve<{key: string}>({
 
       // verify request
       const msg = Buffer.from(timestamp + body);
-      const isVerified = await verify(msg, signature, PUBLIC_KEY);
+      const isVerified = verify(msg, signature, PUBLIC_KEY);
       if (!isVerified) return new Response("invalid request signature", { status: 401 });
 
       // publish message to subscribers
@@ -81,6 +81,11 @@ Bun.serve<{key: string}>({
     },
     message(ws, message) {
       const moduleHash = String(message);
+      if ( moduleHash === "PING" ) {
+        ws.send("PONG");
+        console.log('PONG', {key: ws.data.key, remoteAddress: ws.remoteAddress});
+        return;
+      }
       if ( !moduleHashes.has(moduleHash) ) {
         ws.send(`❌ ModuleHash ${moduleHash} not found.`);
         console.log('moduleHash not found', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
