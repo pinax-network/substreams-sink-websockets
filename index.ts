@@ -6,9 +6,22 @@ import { banner } from "./src/banner.js";
 console.log(`Server listening on PORT http://localhost:${PORT}`);
 console.log("Verifying with PUBLIC_KEY", PUBLIC_KEY);
 
-Bun.serve({
+// internal memory of moduleHashes (used as WebSocket channels)
+// TO-DO could be stored in a database (SQLite)
+const moduleHashes = new Set<string>();
+
+Bun.serve<{key: string}>({
   port: PORT,
   async fetch(req: Request, server: Server) {
+    // Bun automatically returns a 101 Switching Protocols
+    // if the upgrade succeeds
+    const key = req.headers.get("sec-websocket-key")
+    const success = server.upgrade(req, {data: { key }});
+    if (success) {
+      console.log('upgrade', {key});
+      return undefined;
+    }
+
     // GET request
     if ( req.method == "GET" ) {
       const { pathname } = new URL(req.url);
@@ -38,8 +51,9 @@ Bun.serve({
       // publish message to subscribers
       const { clock, manifest } = JSON.parse(body);
       const { moduleHash } = manifest;
-      console.log(`server.publish message (block=${clock.number}, moduleHash=${moduleHash})`); // to remove
-      server.publish("message", body);
+      moduleHashes.add(moduleHash);
+      const response = server.publish(moduleHash, body);
+      console.log('server.publish', {response, block: clock.number, moduleHash});
 
       return new Response("OK");
     }
@@ -47,11 +61,27 @@ Bun.serve({
   },
   websocket: {
     open(ws) {
-      console.log(`${ws.remoteAddress} client connected`);
+      console.log('open', {key: ws.data.key, remoteAddress: ws.remoteAddress});
+      ws.send("🎉 Connected!");
+    },
+    close(ws, code, reason) {
+      console.log('close', {key: ws.data.key, remoteAddress: ws.remoteAddress, code, reason});
     },
     message(ws, message) {
-      // console.log(ws.data.body)
-      // ws.send(ws.data.body);
+      const moduleHash = String(message);
+      if ( !moduleHashes.has(moduleHash) ) {
+        ws.send(`❌ ModuleHash ${moduleHash} not found.`);
+        console.log('moduleHash not found', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
+        return;
+      }
+      if ( ws.isSubscribed(moduleHash) ) {
+        ws.send(`⚠️ Already subscribed to ${moduleHash}.`);
+        console.log('already subscribed', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
+        return;
+      }
+      ws.subscribe(moduleHash);
+      ws.send(`🚀 Subscribed to ${moduleHash}!`);
+      console.log('subscribed', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
     },
   },
 });
