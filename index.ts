@@ -1,13 +1,16 @@
 import { Server } from "bun";
+import { Database } from "bun:sqlite";
 import { PORT, PUBLIC_KEY } from "./src/config.js";
 import { verify } from "./src/verify.js";
 import { banner } from "./src/banner.js";
+import { insert, select } from "./src/sqlite.js";
 
 console.log(`Server listening on PORT http://localhost:${PORT}`);
 console.log("Verifying with PUBLIC_KEY", PUBLIC_KEY);
 
 // internal memory of moduleHashes (used as WebSocket channels)
-// TO-DO could be stored in a database (SQLite)
+
+const db = new Database("mydb.sqlite");
 const moduleHashes = new Set<string>();
 
 Bun.serve<{key: string}>({
@@ -28,6 +31,7 @@ Bun.serve<{key: string}>({
       if ( pathname === "/") return new Response(banner())
       if ( pathname === "/health") return new Response("OK");
       if ( pathname === "/metrics") return new Response("TO-DO Prometheus metrics");
+      if ( pathname === "/subscribe") return new Response(JSON.stringify(select(db)));
       return new Response("Not found", { status: 404 });
     }
 
@@ -49,10 +53,12 @@ Bun.serve<{key: string}>({
       if (!isVerified) return new Response("invalid request signature", { status: 401 });
 
       // publish message to subscribers
+      console.log(JSON.parse(body))
       const { clock, manifest } = JSON.parse(body);
       const { moduleHash } = manifest;
       moduleHashes.add(moduleHash);
       const response = server.publish(moduleHash, body);
+      insert(db, moduleHash)
       console.log('server.publish', {response, block: clock.number, timestamp: clock.timestamp, moduleHash});
 
       return new Response("OK");
