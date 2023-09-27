@@ -1,4 +1,4 @@
-function create(db){
+function create(db: any){
     db.query(`create table if not exists data (moduleHash text primary key)`).run();
 }
 

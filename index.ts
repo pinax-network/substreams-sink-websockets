@@ -53,7 +53,13 @@ Bun.serve<{key: string}>({
       if (!isVerified) return new Response("invalid request signature", { status: 401 });
 
       // publish message to subscribers
-      console.log(JSON.parse(body))
+
+      if (JSON.parse(body).message == "PING"){
+        const message = JSON.parse(body).message;
+        const response = server.publish(message, body);
+        console.log('server.publish', {response, message});
+        return new Response("OK");
+      }
       const { clock, manifest } = JSON.parse(body);
       const { moduleHash } = manifest;
       moduleHashes.add(moduleHash);
