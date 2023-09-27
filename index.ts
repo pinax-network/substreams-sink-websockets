@@ -4,6 +4,7 @@ import { PORT, PUBLIC_KEY } from "./src/config.js";
 import { verify } from "./src/verify.js";
 import { banner } from "./src/banner.js";
 import { insert, select } from "./src/sqlite.js";
+import * as prometheus from "./src/prometheus.js";
 
 console.log(`Server listening on PORT http://localhost:${PORT}`);
 console.log("Verifying with PUBLIC_KEY", PUBLIC_KEY);
@@ -30,7 +31,7 @@ Bun.serve<{key: string}>({
       const { pathname } = new URL(req.url);
       if ( pathname === "/") return new Response(banner())
       if ( pathname === "/health") return new Response("OK");
-      if ( pathname === "/metrics") return new Response("TO-DO Prometheus metrics");
+      if ( pathname === "/metrics") return new Response(prometheus.registry);
       if ( pathname === "/subscribe") return new Response(JSON.stringify(select(db)));
       return new Response("Not found", { status: 404 });
     }
@@ -73,14 +74,19 @@ Bun.serve<{key: string}>({
   },
   websocket: {
     open(ws) {
+      prometheus.activeConnections.inc(1);
+      prometheus.connected.inc(1);
       console.log('open', {key: ws.data.key, remoteAddress: ws.remoteAddress});
       ws.send("🎉 Connected!");
     },
     close(ws, code, reason) {
+      prometheus.activeConnections.dec(1);
+      prometheus.disconnects.inc(1);
       console.log('close', {key: ws.data.key, remoteAddress: ws.remoteAddress, code, reason});
     },
     message(ws, message) {
       const moduleHash = String(message);
+      prometheus.publishedMessages.inc(1);
       if ( moduleHash === "PING" ) {
         ws.send("PONG");
         console.log('PONG', {key: ws.data.key, remoteAddress: ws.remoteAddress});
