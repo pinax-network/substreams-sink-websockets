@@ -53,7 +53,7 @@ Bun.serve<{key: string}>({
       const { moduleHash } = manifest;
       moduleHashes.add(moduleHash);
       const response = server.publish(moduleHash, body);
-      console.log('server.publish', {response, block: clock.number, moduleHash});
+      console.log('server.publish', {response, block: clock.number, timestamp: clock.timestamp, moduleHash});
 
       return new Response("OK");
     }
