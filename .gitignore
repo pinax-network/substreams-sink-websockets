@@ -174,3 +174,6 @@ dist
 
 # IntelliJ based IDEs
 .idea
+
+# SQLite
+*.sqlite
