@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Substreams Service Websockets",
   "name": "substreams-service-websockets",
+  "homepage": "https://github.com/pinax-network/substreams-sink-websockets",
   "type": "module",
   "scripts": {
     "start": "bun run index.ts",
@@ -12,7 +13,7 @@
   },
   "dependencies": {
     "dotenv": "latest",
-    "prom-client": "^14.2.0",
+    "prom-client": "latest",
     "tweetnacl": "latest"
   },
   "devDependencies": {

@@ -12,7 +12,19 @@ export function banner()  {
     ░░░╚═╝░░░╚═╝░░╚══════╝╚═════╝░╚═════╝░░╚════╝░░╚════╝░╚═╝░░╚═╝╚══════╝░░░╚═╝░░░╚═════╝░
 
 `
-    text += `                             🚀 ${pkg.description} v${pkg.version}\n`
+    text += `                             🚀 ${pkg.description} v${pkg.version}
+
+    Documentation: ${pkg.homepage}
+
+    HTTP GET
+        /health
+        /metrics
+        /subscribe
+
+    WebSocket
+        message <moduleHash>
+
+`
 
     return text;
 }
