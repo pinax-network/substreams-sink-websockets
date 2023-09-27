@@ -1,4 +1,3 @@
-
 function create(db){
     db.query(`create table if not exists data (moduleHash text primary key)`).run();
 }
