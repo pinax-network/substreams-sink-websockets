@@ -1,0 +1,6 @@
+POST http://localhost:3000 HTTP/1.1
+content-type: application/json
+x-signature-ed25519: 32c4f322a21ac05e7c9b7374bb702ccd834e56aeebe8320048440833f2e18358014a5790302fbe3ead8c956cdf2b05c9181b787c55c3e40dc6dbc3ab2cfe730f
+x-signature-timestamp: 1686871505
+
+{"message":"PING"}
