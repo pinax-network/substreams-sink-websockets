@@ -1,20 +1,23 @@
-import client, {Counter, Gauge} from 'prom-client';
+import client from 'prom-client';
 
 export const register = new client.Registry();
 
-
-export function registerCounter(name: string, help: string) {
+function registerCounter(name: string, help: string) {
     try {
-        register.registerMetric( new client.Counter({ name, help }));
-        return register.getSingleMetric(name) as Counter;
+        const counter = new client.Counter({ name, help });
+        register.registerMetric(counter);
+        console.log(`Counter '${name}' registered`);
+        return counter;
     } catch (error) {
     }
 }
 
-export function registerGauge(name: string, help: string) {
+function registerGauge(name: string, help: string) {
     try {
-        register.registerMetric( new client.Gauge({ name, help }));
-        return register.getSingleMetric(name) as Gauge;
+        const gauge = new client.Gauge({ name, help });
+        register.registerMetric(gauge);
+        console.log(`Gauge '${name}' registered`);
+        return gauge;
     } catch (error) {
     }
 }
@@ -25,4 +28,4 @@ export const publishedMessages = registerCounter('published_messages', 'Total pu
 export const bytesPublished = registerCounter('bytes_published', 'Total bytes published');
 export const disconnects = registerCounter('disconnects', 'Total disconnects');
 
-export const registry = await register.metrics();
+export const registry = register

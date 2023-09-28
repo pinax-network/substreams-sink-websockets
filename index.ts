@@ -31,7 +31,7 @@ Bun.serve<{key: string}>({
       const { pathname } = new URL(req.url);
       if ( pathname === "/") return new Response(banner())
       if ( pathname === "/health") return new Response("OK");
-      if ( pathname === "/metrics") return new Response(prometheus.registry);
+      if ( pathname === "/metrics") return new Response(await prometheus.registry.metrics());
       if ( pathname === "/subscribe") return new Response(JSON.stringify(select(db)));
       return new Response("Not found", { status: 404 });
     }
@@ -58,14 +58,24 @@ Bun.serve<{key: string}>({
       if (JSON.parse(body).message == "PING"){
         const message = JSON.parse(body).message;
         const response = server.publish(message, body);
+        const pingBytes = Buffer.byteLength(body + message, 'utf8')
+        prometheus.bytesPublished.inc(pingBytes);
+        prometheus.publishedMessages.inc(1);
         console.log('server.publish', {response, message});
         return new Response("OK");
       }
       const { clock, manifest } = JSON.parse(body);
       const { moduleHash } = manifest;
-      moduleHashes.add(moduleHash);
+      const bytes = Buffer.byteLength(body + moduleHash, 'utf8')
       const response = server.publish(moduleHash, body);
+
+      prometheus.bytesPublished.inc(bytes);
+      prometheus.publishedMessages.inc(1);
+      moduleHashes.add(moduleHash);
+
+      //Insert moduleHash into SQLite DB
       insert(db, moduleHash)
+
       console.log('server.publish', {response, block: clock.number, timestamp: clock.timestamp, moduleHash});
 
       return new Response("OK");
@@ -86,7 +96,6 @@ Bun.serve<{key: string}>({
     },
     message(ws, message) {
       const moduleHash = String(message);
-      prometheus.publishedMessages.inc(1);
       if ( moduleHash === "PING" ) {
         ws.send("PONG");
         console.log('PONG', {key: ws.data.key, remoteAddress: ws.remoteAddress});
