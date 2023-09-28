@@ -21,10 +21,12 @@ export function banner()  {
         /metrics
         /subscribe
 
+    HTTP POST (Ed25519 signature)
+        / {timestamp, signature, body}
+        / {"message":"PING"}
+
     WebSocket
         message <moduleHash>
-
 `
-
     return text;
 }
