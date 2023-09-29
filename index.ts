@@ -12,7 +12,7 @@ console.log("Verifying with PUBLIC_KEY", PUBLIC_KEY);
 // internal memory of moduleHashes (used as WebSocket channels)
 
 const db = new Database("./sqlite/moduleHashes.sqlite");
-const traces = new Database("./sqlite/session.sqlite");
+const traces = new Database("./sqlite/sessionId.sqlite");
 const moduleHashes = new Set<string>();
 
 Bun.serve<{key: string}>({
