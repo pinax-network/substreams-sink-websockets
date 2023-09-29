@@ -11,7 +11,8 @@ console.log("Verifying with PUBLIC_KEY", PUBLIC_KEY);
 
 // internal memory of moduleHashes (used as WebSocket channels)
 
-const db = new Database("db.sqlite");
+const db = new Database("./sqlite/moduleHashes.sqlite");
+const traces = new Database("./sqlite/session.sqlite");
 const moduleHashes = new Set<string>();
 
 Bun.serve<{key: string}>({
@@ -32,7 +33,7 @@ Bun.serve<{key: string}>({
       if ( pathname === "/") return new Response(banner())
       if ( pathname === "/health") return new Response(JSON.stringify((await checkHealth()).data), Object(await checkHealth()).status);
       if ( pathname === "/metrics") return new Response(await prometheus.registry.metrics());
-      if ( pathname === "/subscribe") return new Response(JSON.stringify(select(db)));
+      if ( pathname === "/subscribe") return new Response(JSON.stringify(select(db, "moduleHash")), { status: 200 });
       return new Response("Not found", { status: 400 });
     }
 
@@ -64,7 +65,7 @@ Bun.serve<{key: string}>({
         console.log('server.publish', {response, message});
         return new Response("OK");
       }
-      const { clock, manifest } = JSON.parse(body);
+      const { clock, manifest, traceId } = JSON.parse(body);
       const { moduleHash } = manifest;
       const bytes = Buffer.byteLength(body + moduleHash, 'utf8')
       const response = server.publish(moduleHash, body);
@@ -77,7 +78,11 @@ Bun.serve<{key: string}>({
       moduleHashes.add(moduleHash);
 
       //Insert moduleHash into SQLite DB
-      insert(db, moduleHash)
+
+      const temp = "654b2e1fd43e8468863595baaad68627"
+
+      insert(db, moduleHash, "moduleHash")
+      insert (traces, temp, "sessionId")//when ready, replace temp with traceId.sessionId
 
       console.log('server.publish', {response, block: clock.number, timestamp: clock.timestamp, moduleHash});
 
