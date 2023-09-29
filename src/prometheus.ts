@@ -22,7 +22,30 @@ function registerGauge(name: string, help: string) {
     }
 }
 
+export async function customMetric(moduleHash: string) {
+    const name: any = `webhook_hash_${moduleHash}`;
+    const help = `Individual webhook session`;
+    try {
+        const gauge = new client.Gauge({ name, help });
+        register.registerMetric(gauge);
+        console.log(`Gauge '${name}' registered`);
+        if (await getSingleMetric(name) == 0) {
+            totalWebhooks.inc(1);
+            gauge.inc(1);
+        }
+        return gauge;
+    } catch (error) {
+    }
+}
+
+export async function getSingleMetric(name: string) {
+    const metric = registry.getSingleMetric(name);
+    const get = await metric?.get();
+    return get?.values[0].value;
+}
+
 export const activeConnections = registerGauge('active_connections', 'All active connections');
+export const totalWebhooks = registerGauge('total_webhooks_sessions', 'Total webhook sessions');
 export const connected = registerCounter('connected', 'Total connected clients');
 export const publishedMessages = registerCounter('published_messages', 'Total published messages');
 export const bytesPublished = registerCounter('bytes_published', 'Total bytes published');

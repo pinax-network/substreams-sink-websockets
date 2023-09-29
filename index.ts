@@ -5,7 +5,7 @@ import { verify } from "./src/verify.js";
 import { banner } from "./src/banner.js";
 import { insert, select } from "./src/sqlite.js";
 import * as prometheus from "./src/prometheus.js";
-
+import { checkHealth } from "./src/health.js";
 console.log(`Server listening on PORT http://localhost:${PORT}`);
 console.log("Verifying with PUBLIC_KEY", PUBLIC_KEY);
 
@@ -30,10 +30,10 @@ Bun.serve<{key: string}>({
     if ( req.method == "GET" ) {
       const { pathname } = new URL(req.url);
       if ( pathname === "/") return new Response(banner())
-      if ( pathname === "/health") return new Response("OK");
+      if ( pathname === "/health") return new Response(JSON.stringify((await checkHealth()).data), Object(await checkHealth()).status);
       if ( pathname === "/metrics") return new Response(await prometheus.registry.metrics());
       if ( pathname === "/subscribe") return new Response(JSON.stringify(select(db)));
-      return new Response("Not found", { status: 404 });
+      return new Response("Not found", { status: 400 });
     }
 
     // POST request
@@ -52,15 +52,15 @@ Bun.serve<{key: string}>({
       const msg = Buffer.from(timestamp + body);
       const isVerified = verify(msg, signature, PUBLIC_KEY);
       if (!isVerified) return new Response("invalid request signature", { status: 401 });
-
       // publish message to subscribers
 
       if (JSON.parse(body).message == "PING"){
         const message = JSON.parse(body).message;
         const response = server.publish(message, body);
         const pingBytes = Buffer.byteLength(body + message, 'utf8')
+
         prometheus.bytesPublished.inc(pingBytes);
-        prometheus.publishedMessages.inc(1);
+
         console.log('server.publish', {response, message});
         return new Response("OK");
       }
@@ -68,9 +68,12 @@ Bun.serve<{key: string}>({
       const { moduleHash } = manifest;
       const bytes = Buffer.byteLength(body + moduleHash, 'utf8')
       const response = server.publish(moduleHash, body);
+      const name: any = `webhook_hash_${moduleHash}`;
+      const help = `Individual webhook session`;
 
       prometheus.bytesPublished.inc(bytes);
       prometheus.publishedMessages.inc(1);
+      prometheus.customMetric(moduleHash)
       moduleHashes.add(moduleHash);
 
       //Insert moduleHash into SQLite DB
@@ -98,6 +101,8 @@ Bun.serve<{key: string}>({
       const moduleHash = String(message);
       if ( moduleHash === "PING" ) {
         ws.send("PONG");
+        ws.ping();
+        ws.pong();
         console.log('PONG', {key: ws.data.key, remoteAddress: ws.remoteAddress});
         return;
       }
