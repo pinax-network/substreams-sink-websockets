@@ -47,6 +47,7 @@ Bun.serve<{key: string}>({
       const timestamp = req.headers.get("x-signature-timestamp");
       const signature = req.headers.get("x-signature-ed25519");
       const body = await req.text();
+      console.log('POST', {timestamp, signature, body});
 
       // validate request
       if (!timestamp) return new Response("missing required timestamp in headers", { status: 400 });
@@ -57,22 +58,24 @@ Bun.serve<{key: string}>({
       const msg = Buffer.from(timestamp + body);
       const isVerified = verify(msg, signature, PUBLIC_KEY);
       if (!isVerified) return new Response("invalid request signature", { status: 401 });
-      // publish message to subscribers
+      const json = JSON.parse(body);
 
-      if (JSON.parse(body).message == "PING"){
+      // Ping
+      if (json?.message == "PING") {
         const message = JSON.parse(body).message;
         const response = server.publish(message, body);
         const pingBytes = Buffer.byteLength(body + message, 'utf8')
 
         prometheus.bytesPublished.inc(pingBytes);
-
         console.log('server.publish', {response, message});
         return new Response("OK");
       }
       // Get data from Substreams metadata
-      const { clock, manifest } = JSON.parse(body);
-      const { moduleHash } = manifest;
+      const { clock, manifest } = json;
+      const moduleHash = manifest?.moduleHash;
       const bytes = Buffer.byteLength(body + moduleHash, 'utf8')
+
+      // publish message to subscribers
       const response = server.publish(moduleHash, body);
 
       // Prometheus Metrics
