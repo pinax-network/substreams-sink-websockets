@@ -1,13 +1,17 @@
-function create(db: any, column: string){
-    db.query(`create table if not exists data (${column} text primary key)`).run();
+import Database from "bun:sqlite";
+
+export function create(db: Database, table: string) {
+    return db.query(`CREATE TABLE IF NOT EXISTS ${table} (key TEXT PRIMARY KEY, value TEXT)`).run();
 }
 
-export function insert(db: any, data: string, column: string){
-    create(db, column)
-    return db.query(`insert or ignore into data (${column}) values (?)`).all(data);
+export function insert(db: Database, table: string, key: string, value: string|number) {
+    return db.query(`INSERT OR REPLACE INTO ${table} (key, value) values (?, ?)`).all(key, value);
 }
 
-export function select(db: any, column: string){
-    create(db, column)
-    return db.query(`select ${column} from data`).all();
+export function findAll(db: Database, table: string) {
+    return db.query(`SELECT * from ${table}`).all();
+}
+
+export function find(db: Database, table: string, key: string) {
+    return db.query(`SELECT * from ${table} WHERE key=${key}`).all();
 }

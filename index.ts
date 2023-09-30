@@ -3,17 +3,19 @@ import { Database } from "bun:sqlite";
 import { PORT, PUBLIC_KEY } from "./src/config.js";
 import { verify } from "./src/verify.js";
 import { banner } from "./src/banner.js";
-import { insert, select } from "./src/sqlite.js";
+import * as sqlite from "./src/sqlite.js";
 import * as prometheus from "./src/prometheus.js";
 import { checkHealth } from "./src/health.js";
+import { toJSON } from "./src/http.js";
 console.log(`Server listening on PORT http://localhost:${PORT}`);
 console.log("Verifying with PUBLIC_KEY", PUBLIC_KEY);
 
-// internal memory of moduleHashes (used as WebSocket channels)
+const moduleHashes = new Set<string>(); // TO-DO: replace using SQLite DB
 
-const db = new Database("./sqlite/moduleHashes.sqlite");
-const traces = new Database("./sqlite/sessionId.sqlite");
-const moduleHashes = new Set<string>();
+// Create SQLite DB
+const db = new Database("./db.sqlite", {create: true}); // TO-DO as .env variable
+sqlite.create(db, "moduleHash");
+sqlite.create(db, "traceId");
 
 Bun.serve<{key: string}>({
   port: PORT,
@@ -31,9 +33,10 @@ Bun.serve<{key: string}>({
     if ( req.method == "GET" ) {
       const { pathname } = new URL(req.url);
       if ( pathname === "/") return new Response(banner())
-      if ( pathname === "/health") return new Response(JSON.stringify((await checkHealth()).data), Object(await checkHealth()).status);
+      if ( pathname === "/health") return toJSON(await checkHealth(db));
       if ( pathname === "/metrics") return new Response(await prometheus.registry.metrics());
-      if ( pathname === "/subscribe") return new Response(JSON.stringify(select(db, "moduleHash")), { status: 200 });
+      if ( pathname === "/moduleHash") return toJSON(sqlite.findAll(db, "moduleHash"));
+      if ( pathname === "/traceId") return toJSON(sqlite.findAll(db, "traceId"));
       return new Response("Not found", { status: 400 });
     }
 
@@ -65,24 +68,22 @@ Bun.serve<{key: string}>({
         console.log('server.publish', {response, message});
         return new Response("OK");
       }
-      const { clock, manifest, traceId } = JSON.parse(body);
+      // Get data from Substreams metadata
+      const { clock, manifest } = JSON.parse(body);
       const { moduleHash } = manifest;
       const bytes = Buffer.byteLength(body + moduleHash, 'utf8')
       const response = server.publish(moduleHash, body);
-      const name: any = `webhook_hash_${moduleHash}`;
-      const help = `Individual webhook session`;
 
+      // Prometheus Metrics
       prometheus.bytesPublished.inc(bytes);
       prometheus.publishedMessages.inc(1);
       prometheus.customMetric(moduleHash)
       moduleHashes.add(moduleHash);
 
-      //Insert moduleHash into SQLite DB
-
-      const temp = "654b2e1fd43e8468863595baaad68627"
-
-      insert(db, moduleHash, "moduleHash")
-      insert (traces, temp, "sessionId")//when ready, replace temp with traceId.sessionId
+      // Insert moduleHash into SQLite DB
+      const traceId = "654b2e1fd43e8468863595baaad68627"; // TO-DO: get traceId from Substreams metadata
+      sqlite.insert(db, "moduleHash", moduleHash, timestamp);
+      sqlite.insert(db, "traceId", traceId, timestamp);
 
       console.log('server.publish', {response, block: clock.number, timestamp: clock.timestamp, moduleHash});
 

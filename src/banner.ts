@@ -19,7 +19,8 @@ export function banner()  {
     HTTP GET
         /health
         /metrics
-        /subscribe
+        /moduleHash
+        /traceId
 
     HTTP POST (Ed25519 signature)
         / {timestamp, signature, body}

@@ -23,7 +23,7 @@ function registerGauge(name: string, help: string) {
 }
 
 export async function customMetric(moduleHash: string) {
-    const name: any = `webhook_hash_${moduleHash}`;
+    const name = `webhook_hash_${moduleHash}`;
     const help = `Individual webhook session`;
     try {
         const gauge = new client.Gauge({ name, help });
