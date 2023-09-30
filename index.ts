@@ -7,7 +7,7 @@ import * as sqlite from "./src/sqlite.js";
 import * as prometheus from "./src/prometheus.js";
 import { checkHealth } from "./src/health.js";
 import { toJSON } from "./src/http.js";
-console.log(`Server listening on PORT http://localhost:${PORT}`);
+console.log(`Server listening on http://${HOSTNAME}:${PORT}`);
 console.log("Verifying with PUBLIC_KEY", PUBLIC_KEY);
 
 const moduleHashes = new Set<string>(); // TO-DO: replace using SQLite DB
