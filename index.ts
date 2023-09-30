@@ -1,6 +1,6 @@
 import { Server } from "bun";
 import { Database } from "bun:sqlite";
-import { PORT, PUBLIC_KEY } from "./src/config.js";
+import { HOSTNAME, PORT, PUBLIC_KEY } from "./src/config.js";
 import { verify } from "./src/verify.js";
 import { banner } from "./src/banner.js";
 import * as sqlite from "./src/sqlite.js";
@@ -19,6 +19,7 @@ sqlite.create(db, "traceId");
 
 Bun.serve<{key: string}>({
   port: PORT,
+  hostname: HOSTNAME,
   async fetch(req: Request, server: Server) {
     // Bun automatically returns a 101 Switching Protocols
     // if the upgrade succeeds
