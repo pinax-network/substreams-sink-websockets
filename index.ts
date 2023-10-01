@@ -99,7 +99,7 @@ Bun.serve<{key: string}>({
       prometheus.active_connections.inc(1);
       prometheus.connected.inc(1);
       console.log('open', {key: ws.data.key, remoteAddress: ws.remoteAddress});
-      ws.send("🎉 Connected!");
+      ws.send(JSON.stringify({message: "🎉 Connected!"}));
     },
     close(ws, code, reason) {
       prometheus.active_connections.dec(1);
@@ -121,17 +121,17 @@ Bun.serve<{key: string}>({
       // Handle Subscribe
       const moduleHash = String(message);
       if ( ws.isSubscribed(moduleHash) ) {
-        ws.send(`⚠️ Already subscribed to ${moduleHash}.`);
+        ws.send(JSON.stringify({message: `⚠️ Already subscribed to ${moduleHash}.`}));
         console.log('already subscribed', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
         return;
       }
       if ( !sqlite.exists(db, "moduleHash", moduleHash) ) {
-        ws.send(`❌ ModuleHash ${moduleHash} not found.`);
+        ws.send(JSON.stringify({message: `❌ ModuleHash ${moduleHash} not found.`}));
         console.log('moduleHash not found', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
         return;
       }
       ws.subscribe(moduleHash);
-      ws.send(`🚀 Subscribed to ${moduleHash}!`);
+      ws.send(JSON.stringify({message: `🚀 Subscribed to ${moduleHash}!`}));
       console.log('subscribed', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
     },
   },
