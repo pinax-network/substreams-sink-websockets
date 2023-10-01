@@ -7,10 +7,8 @@ import * as sqlite from "./src/sqlite.js";
 import * as prometheus from "./src/prometheus.js";
 import { checkHealth } from "./src/health.js";
 import { toJSON } from "./src/http.js";
-console.log(`Server listening on http://${HOSTNAME}:${PORT}`);
+console.log(`Server listening on http://${HOSTNAME || "0.0.0.0"}:${PORT}`);
 console.log("Verifying with PUBLIC_KEY", PUBLIC_KEY);
-
-const moduleHashes = new Set<string>(); // TO-DO: replace using SQLite DB
 
 // Create SQLite DB
 const db = new Database("./db.sqlite", {create: true}); // TO-DO as .env variable
@@ -60,36 +58,37 @@ Bun.serve<{key: string}>({
       if (!isVerified) return new Response("invalid request signature", { status: 401 });
       const json = JSON.parse(body);
 
-      // Ping
+      // Webhook hanshake (not WebSocket related)
       if (json?.message == "PING") {
         const message = JSON.parse(body).message;
-        const response = server.publish(message, body);
-        const pingBytes = Buffer.byteLength(body + message, 'utf8')
-
-        prometheus.bytesPublished.inc(pingBytes);
-        console.log('server.publish', {response, message});
+        console.log('PING WebHook handshake', {message});
         return new Response("OK");
       }
       // Get data from Substreams metadata
       const { clock, manifest } = json;
       const moduleHash = manifest?.moduleHash;
-      const bytes = Buffer.byteLength(body + moduleHash, 'utf8')
 
       // publish message to subscribers
-      const response = server.publish(moduleHash, body);
+      const bytes = server.publish(moduleHash, body);
+      console.log('server.publish', {bytes, block: clock.number, timestamp: clock.timestamp, moduleHash});
 
-      // Prometheus Metrics
-      prometheus.bytesPublished.inc(bytes);
-      prometheus.publishedMessages.inc(1);
-      prometheus.customMetric(moduleHash)
-      moduleHashes.add(moduleHash);
+      // Metrics for published messages
+      // response is:
+      // 0 if the message was dropped
+      // -1 if backpressure was applied
+      // or the number of bytes sent.
+      if ( bytes > 0 ) {
+        prometheus.bytes_published.inc(bytes);
+        prometheus.published_messages.inc(1);
+      }
+      // Metrics for incoming WebHook
+      prometheus.webhook_module_hash.labels({moduleHash}).inc(1);
+      prometheus.webhook_messages.inc(1);
 
       // Upsert moduleHash into SQLite DB
       const traceId = "654b2e1fd43e8468863595baaad68627"; // TO-DO: get traceId from Substreams metadata
       sqlite.replace(db, "moduleHash", moduleHash, timestamp);
       sqlite.replace(db, "traceId", traceId, timestamp);
-
-      console.log('server.publish', {response, block: clock.number, timestamp: clock.timestamp, moduleHash});
 
       return new Response("OK");
     }
@@ -97,13 +96,13 @@ Bun.serve<{key: string}>({
   },
   websocket: {
     open(ws) {
-      prometheus.activeConnections.inc(1);
+      prometheus.active_connections.inc(1);
       prometheus.connected.inc(1);
       console.log('open', {key: ws.data.key, remoteAddress: ws.remoteAddress});
       ws.send("🎉 Connected!");
     },
     close(ws, code, reason) {
-      prometheus.activeConnections.dec(1);
+      prometheus.active_connections.dec(1);
       prometheus.disconnects.inc(1);
       console.log('close', {key: ws.data.key, remoteAddress: ws.remoteAddress, code, reason});
     },

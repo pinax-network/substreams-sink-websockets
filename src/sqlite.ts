@@ -27,3 +27,7 @@ export function select(db: Database, table: string, key: string) {
 export function exists(db: Database, table: string, key: string ) {
     return select(db, table, key).length > 0;
 }
+
+// TO-DO: UPDATE
+// UPDATE product SET price = price + 50 WHERE id = 1
+// UPDATE {table} SET {column} = {column} + {value} WHERE {condition}

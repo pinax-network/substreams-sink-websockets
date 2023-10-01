@@ -1,40 +1,23 @@
-import client from 'prom-client';
+import client, { Counter, CounterConfiguration, Gauge, GaugeConfiguration } from 'prom-client';
 
-export const register = new client.Registry();
+export const registry = new client.Registry();
 
-function registerCounter(name: string, help: string) {
+// Metrics
+export function registerCounter(name: string, help = "help", labelNames: string[] = [], config?: CounterConfiguration<string>): Counter | undefined {
     try {
-        const counter = new client.Counter({ name, help });
-        register.registerMetric(counter);
-        console.log(`Counter '${name}' registered`);
-        return counter;
-    } catch (error) {
+        registry.registerMetric(new Counter({ name, help, labelNames, ...config }));
+        return registry.getSingleMetric(name) as Counter;
+    } catch (e) {
+        console.error(e);
     }
 }
 
-function registerGauge(name: string, help: string) {
+export function registerGauge(name: string, help = "help", labelNames: string[] = [], config?: GaugeConfiguration<string>): Gauge | undefined {
     try {
-        const gauge = new client.Gauge({ name, help });
-        register.registerMetric(gauge);
-        console.log(`Gauge '${name}' registered`);
-        return gauge;
-    } catch (error) {
-    }
-}
-
-export async function customMetric(moduleHash: string) {
-    const name = `webhook_hash_${moduleHash}`;
-    const help = `Individual webhook session`;
-    try {
-        const gauge = new client.Gauge({ name, help });
-        register.registerMetric(gauge);
-        console.log(`Gauge '${name}' registered`);
-        if (await getSingleMetric(name) == 0) {
-            totalWebhooks.inc(1);
-            gauge.inc(1);
-        }
-        return gauge;
-    } catch (error) {
+        registry.registerMetric(new Gauge({ name, help, labelNames, ...config }));
+        return registry.getSingleMetric(name) as Gauge;
+    } catch (e) {
+        console.error(e);
     }
 }
 
@@ -44,11 +27,13 @@ export async function getSingleMetric(name: string) {
     return get?.values[0].value;
 }
 
-export const activeConnections = registerGauge('active_connections', 'All active connections');
-export const totalWebhooks = registerGauge('total_webhooks_sessions', 'Total webhook sessions');
-export const connected = registerCounter('connected', 'Total connected clients');
-export const publishedMessages = registerCounter('published_messages', 'Total published messages');
-export const bytesPublished = registerCounter('bytes_published', 'Total bytes published');
-export const disconnects = registerCounter('disconnects', 'Total disconnects');
+// Webhook metrics
+export const webhook_messages = registerCounter('webhook_messages', 'Total Webhook messages received');
+export const webhook_module_hash = registerCounter('webhook_module_hash', 'Total Webhook module hashes message received', ['moduleHash']);
 
-export const registry = register
+// WebSocket metrics
+export const active_connections = registerGauge('active_connections', 'All active connections');
+export const connected = registerCounter('connected', 'Total connected clients');
+export const published_messages = registerCounter('published_messages', 'Total published messages');
+export const bytes_published = registerCounter('bytes_published', 'Total bytes published');
+export const disconnects = registerCounter('disconnects', 'Total disconnects');
