@@ -9,16 +9,16 @@ export default function Component() {
   const [messages, setMessages] = useState<string[]>([]);
   const moduleHash = "90a60a0dccc4ba24b84f93fb777af45cd7a70350";
   // const webSocket = new WebSocket("ws://substreams-sink-websockets-production.up.railway.app");
-  const webSocket = new WebSocket("ws://localhost:3001");
+  const ws = new WebSocket("ws://localhost:3000");
 
-  webSocket.onopen = () => {
-    webSocket.send(moduleHash);
+  ws.onopen = () => {
+    ws.send(moduleHash);
   };
 
   // if ( webSocket.readyState === WebSocket.OPEN ) {
   //   webSocket.send("moduleHash")
   // }
-  webSocket.onmessage = event => {
+  ws.onmessage = event => {
     console.log(event.data);
     setMessages([...messages, event.data]);
   }

@@ -1,17 +1,29 @@
 import Database from "bun:sqlite";
 
+export type KV = {key: string, value: string|number};
+
 export function create(db: Database, table: string) {
-    return db.query(`CREATE TABLE IF NOT EXISTS ${table} (key TEXT PRIMARY KEY, value TEXT)`).run();
+    if ( !table ) throw new Error("table is required");
+    return db.run(`CREATE TABLE IF NOT EXISTS ${table} (key TEXT PRIMARY KEY, value TEXT)`);
 }
 
-export function insert(db: Database, table: string, key: string, value: string|number) {
-    return db.query(`INSERT OR REPLACE INTO ${table} (key, value) values (?, ?)`).all(key, value);
+export function replace(db: Database, table: string, key: string, value: string|number) {
+    return db.prepare(`REPLACE INTO ${table} (key, value) VALUES (?, ?)`).run(key, value);
 }
 
-export function findAll(db: Database, table: string) {
-    return db.query(`SELECT * from ${table}`).all();
+export function selectAll(db: Database, table: string) {
+    return db.query(`SELECT * FROM ${table}`).all() as KV[];
 }
 
-export function find(db: Database, table: string, key: string) {
-    return db.query(`SELECT * from ${table} WHERE key=${key}`).all();
+export function count(db: Database, table: string) {
+    const result = db.query(`SELECT COUNT(key) FROM ${table}`).all();
+    return result[0]["COUNT(key)"];
+}
+
+export function select(db: Database, table: string, key: string) {
+    return db.query(`SELECT * FROM ${table} WHERE key=(?) LIMIT 1`).all(key) as KV[];
+}
+
+export function exists(db: Database, table: string, key: string ) {
+    return select(db, table, key).length > 0;
 }

@@ -27,7 +27,7 @@ Bun.serve<{key: string}>({
     const success = server.upgrade(req, {data: { key }});
     if (success) {
       console.log('upgrade', {key});
-      return undefined;
+      return;
     }
 
     // GET request
@@ -36,8 +36,8 @@ Bun.serve<{key: string}>({
       if ( pathname === "/") return new Response(banner())
       if ( pathname === "/health") return toJSON(await checkHealth(db));
       if ( pathname === "/metrics") return new Response(await prometheus.registry.metrics());
-      if ( pathname === "/moduleHash") return toJSON(sqlite.findAll(db, "moduleHash"));
-      if ( pathname === "/traceId") return toJSON(sqlite.findAll(db, "traceId"));
+      if ( pathname === "/moduleHash") return toJSON(sqlite.selectAll(db, "moduleHash"));
+      if ( pathname === "/traceId") return toJSON(sqlite.selectAll(db, "traceId"));
       return new Response("Not found", { status: 400 });
     }
 
@@ -84,10 +84,10 @@ Bun.serve<{key: string}>({
       prometheus.customMetric(moduleHash)
       moduleHashes.add(moduleHash);
 
-      // Insert moduleHash into SQLite DB
+      // Upsert moduleHash into SQLite DB
       const traceId = "654b2e1fd43e8468863595baaad68627"; // TO-DO: get traceId from Substreams metadata
-      sqlite.insert(db, "moduleHash", moduleHash, timestamp);
-      sqlite.insert(db, "traceId", traceId, timestamp);
+      sqlite.replace(db, "moduleHash", moduleHash, timestamp);
+      sqlite.replace(db, "traceId", traceId, timestamp);
 
       console.log('server.publish', {response, block: clock.number, timestamp: clock.timestamp, moduleHash});
 
@@ -108,22 +108,27 @@ Bun.serve<{key: string}>({
       console.log('close', {key: ws.data.key, remoteAddress: ws.remoteAddress, code, reason});
     },
     message(ws, message) {
-      const moduleHash = String(message);
-      if ( moduleHash === "PING" ) {
-        ws.send("PONG");
-        ws.ping();
+      // Handle Pings
+      // TO-DO: maybe to be removed??
+      // https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers#pings_and_pongs_the_heartbeat_of_websockets
+      if ( message === "0x9" || message === "pong" ) {
+        console.log('ping', {key: ws.data.key, remoteAddress: ws.remoteAddress});
         ws.pong();
-        console.log('PONG', {key: ws.data.key, remoteAddress: ws.remoteAddress});
+        if ( message == "0x9" ) ws.send("0xA");
+        else ws.send("pong");
         return;
       }
-      if ( !moduleHashes.has(moduleHash) ) {
-        ws.send(`❌ ModuleHash ${moduleHash} not found.`);
-        console.log('moduleHash not found', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
-        return;
-      }
+
+      // Handle Subscribe
+      const moduleHash = String(message);
       if ( ws.isSubscribed(moduleHash) ) {
         ws.send(`⚠️ Already subscribed to ${moduleHash}.`);
         console.log('already subscribed', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
+        return;
+      }
+      if ( !sqlite.exists(db, "moduleHash", moduleHash) ) {
+        ws.send(`❌ ModuleHash ${moduleHash} not found.`);
+        console.log('moduleHash not found', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
         return;
       }
       ws.subscribe(moduleHash);
