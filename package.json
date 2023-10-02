@@ -10,7 +10,7 @@
     "test": "bun test",
     "build": "bun build --compile ./index.ts --outfile substreams-service-websockets",
     "dev": "bun run --watch index.ts",
-    "client": "bun run examples/client.ts"
+    "client": "bun run examples/bun/client.ts"
   },
   "dependencies": {
     "dotenv": "latest",
