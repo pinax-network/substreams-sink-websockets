@@ -11,7 +11,7 @@ console.log(`Server listening on http://${HOSTNAME || "0.0.0.0"}:${PORT}`);
 console.log("Verifying with PUBLIC_KEY", PUBLIC_KEY);
 
 // Create SQLite DB
-const db = new Database("./db.sqlite", {create: true}); // TO-DO as .env variable
+const db = new Database("./sqlite/db.sqlite", {create: true}); // TO-DO as .env variable
 sqlite.create(db, "moduleHash");
 sqlite.create(db, "traceId");
 
@@ -85,8 +85,13 @@ Bun.serve<{key: string}>({
       prometheus.webhook_module_hash.labels({moduleHash}).inc(1);
       prometheus.webhook_messages.inc(1);
 
-      // Upsert moduleHash into SQLite DB
+      //Metrics for trace id
       const traceId = "654b2e1fd43e8468863595baaad68627"; // TO-DO: get traceId from Substreams metadata
+      if (traceId) {
+        prometheus.trace_id.inc(1);
+      }
+
+      // Upsert moduleHash into SQLite DB
       sqlite.replace(db, "moduleHash", moduleHash, timestamp);
       sqlite.replace(db, "traceId", traceId, timestamp);
 
@@ -111,6 +116,7 @@ Bun.serve<{key: string}>({
       // TO-DO: maybe to be removed??
       // https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers#pings_and_pongs_the_heartbeat_of_websockets
       if ( message === "0x9" || message === "pong" ) {
+        prometheus.total_pings.inc(1);
         console.log('ping', {key: ws.data.key, remoteAddress: ws.remoteAddress});
         ws.pong();
         if ( message == "0x9" ) ws.send("0xA");
