@@ -1,5 +1,3 @@
-// http-server . -c-1
-
 const messages = document.querySelector("#messages");
 const send = document.querySelector("#send");
 const message = document.querySelector("#message");

@@ -1,4 +1,3 @@
-// bun run client.ts
 import "dotenv/config"
 const ws = new WebSocket("ws://localhost:3000");
 
