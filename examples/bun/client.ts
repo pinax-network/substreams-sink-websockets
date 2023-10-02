@@ -1,10 +1,12 @@
-const socket = new WebSocket("ws://localhost:3000");
+// bun run client.ts
 
-socket.onopen = () => {
+const ws = new WebSocket("ws://localhost:3000");
+
+ws.onopen = () => {
     console.log("Connected!");
-    socket.send("6aa24e6aa34db4a4faf55c69c6f612aeb06053c2")
+    ws.send("90a60a0dccc4ba24b84f93fb777af45cd7a70350")
 };
 
-socket.onmessage = (event) => {
+ws.onmessage = (event) => {
     console.log(`Message from server: ${event.data}`);
 };

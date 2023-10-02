@@ -7,10 +7,8 @@ import * as sqlite from "./src/sqlite.js";
 import * as prometheus from "./src/prometheus.js";
 import { checkHealth } from "./src/health.js";
 import { toJSON } from "./src/http.js";
-console.log(`Server listening on http://${HOSTNAME}:${PORT}`);
+console.log(`Server listening on http://${HOSTNAME || "0.0.0.0"}:${PORT}`);
 console.log("Verifying with PUBLIC_KEY", PUBLIC_KEY);
-
-const moduleHashes = new Set<string>(); // TO-DO: replace using SQLite DB
 
 // Create SQLite DB
 const db = new Database("./db.sqlite", {create: true}); // TO-DO as .env variable
@@ -27,7 +25,7 @@ Bun.serve<{key: string}>({
     const success = server.upgrade(req, {data: { key }});
     if (success) {
       console.log('upgrade', {key});
-      return undefined;
+      return;
     }
 
     // GET request
@@ -36,8 +34,8 @@ Bun.serve<{key: string}>({
       if ( pathname === "/") return new Response(banner())
       if ( pathname === "/health") return toJSON(await checkHealth(db));
       if ( pathname === "/metrics") return new Response(await prometheus.registry.metrics());
-      if ( pathname === "/moduleHash") return toJSON(sqlite.findAll(db, "moduleHash"));
-      if ( pathname === "/traceId") return toJSON(sqlite.findAll(db, "traceId"));
+      if ( pathname === "/moduleHash") return toJSON(sqlite.selectAll(db, "moduleHash"));
+      if ( pathname === "/traceId") return toJSON(sqlite.selectAll(db, "traceId"));
       return new Response("Not found", { status: 400 });
     }
 
@@ -60,36 +58,37 @@ Bun.serve<{key: string}>({
       if (!isVerified) return new Response("invalid request signature", { status: 401 });
       const json = JSON.parse(body);
 
-      // Ping
+      // Webhook hanshake (not WebSocket related)
       if (json?.message == "PING") {
         const message = JSON.parse(body).message;
-        const response = server.publish(message, body);
-        const pingBytes = Buffer.byteLength(body + message, 'utf8')
-
-        prometheus.bytesPublished.inc(pingBytes);
-        console.log('server.publish', {response, message});
+        console.log('PING WebHook handshake', {message});
         return new Response("OK");
       }
       // Get data from Substreams metadata
       const { clock, manifest } = json;
       const moduleHash = manifest?.moduleHash;
-      const bytes = Buffer.byteLength(body + moduleHash, 'utf8')
 
       // publish message to subscribers
-      const response = server.publish(moduleHash, body);
+      const bytes = server.publish(moduleHash, body);
+      console.log('server.publish', {bytes, block: clock.number, timestamp: clock.timestamp, moduleHash});
 
-      // Prometheus Metrics
-      prometheus.bytesPublished.inc(bytes);
-      prometheus.publishedMessages.inc(1);
-      prometheus.customMetric(moduleHash)
-      moduleHashes.add(moduleHash);
+      // Metrics for published messages
+      // response is:
+      // 0 if the message was dropped
+      // -1 if backpressure was applied
+      // or the number of bytes sent.
+      if ( bytes > 0 ) {
+        prometheus.bytes_published.inc(bytes);
+        prometheus.published_messages.inc(1);
+      }
+      // Metrics for incoming WebHook
+      prometheus.webhook_module_hash.labels({moduleHash}).inc(1);
+      prometheus.webhook_messages.inc(1);
 
-      // Insert moduleHash into SQLite DB
+      // Upsert moduleHash into SQLite DB
       const traceId = "654b2e1fd43e8468863595baaad68627"; // TO-DO: get traceId from Substreams metadata
-      sqlite.insert(db, "moduleHash", moduleHash, timestamp);
-      sqlite.insert(db, "traceId", traceId, timestamp);
-
-      console.log('server.publish', {response, block: clock.number, timestamp: clock.timestamp, moduleHash});
+      sqlite.replace(db, "moduleHash", moduleHash, timestamp);
+      sqlite.replace(db, "traceId", traceId, timestamp);
 
       return new Response("OK");
     }
@@ -97,37 +96,42 @@ Bun.serve<{key: string}>({
   },
   websocket: {
     open(ws) {
-      prometheus.activeConnections.inc(1);
+      prometheus.active_connections.inc(1);
       prometheus.connected.inc(1);
       console.log('open', {key: ws.data.key, remoteAddress: ws.remoteAddress});
-      ws.send("🎉 Connected!");
+      ws.send(JSON.stringify({message: "🎉 Connected!"}));
     },
     close(ws, code, reason) {
-      prometheus.activeConnections.dec(1);
+      prometheus.active_connections.dec(1);
       prometheus.disconnects.inc(1);
       console.log('close', {key: ws.data.key, remoteAddress: ws.remoteAddress, code, reason});
     },
     message(ws, message) {
-      const moduleHash = String(message);
-      if ( moduleHash === "PING" ) {
-        ws.send("PONG");
-        ws.ping();
+      // Handle Pings
+      // TO-DO: maybe to be removed??
+      // https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers#pings_and_pongs_the_heartbeat_of_websockets
+      if ( message === "0x9" || message === "pong" ) {
+        console.log('ping', {key: ws.data.key, remoteAddress: ws.remoteAddress});
         ws.pong();
-        console.log('PONG', {key: ws.data.key, remoteAddress: ws.remoteAddress});
+        if ( message == "0x9" ) ws.send("0xA");
+        else ws.send("pong");
         return;
       }
-      if ( !moduleHashes.has(moduleHash) ) {
-        ws.send(`❌ ModuleHash ${moduleHash} not found.`);
-        console.log('moduleHash not found', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
-        return;
-      }
+
+      // Handle Subscribe
+      const moduleHash = String(message);
       if ( ws.isSubscribed(moduleHash) ) {
-        ws.send(`⚠️ Already subscribed to ${moduleHash}.`);
+        ws.send(JSON.stringify({message: `⚠️ Already subscribed to ${moduleHash}.`}));
         console.log('already subscribed', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
         return;
       }
+      if ( !sqlite.exists(db, "moduleHash", moduleHash) ) {
+        ws.send(JSON.stringify({message: `❌ ModuleHash ${moduleHash} not found.`}));
+        console.log('moduleHash not found', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
+        return;
+      }
       ws.subscribe(moduleHash);
-      ws.send(`🚀 Subscribed to ${moduleHash}!`);
+      ws.send(JSON.stringify({message: `🚀 Subscribed to ${moduleHash}!`}));
       console.log('subscribed', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
     },
   },
