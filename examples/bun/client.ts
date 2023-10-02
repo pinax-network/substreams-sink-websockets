@@ -1,10 +1,12 @@
 // bun run client.ts
-
+import "dotenv/config"
 const ws = new WebSocket("ws://localhost:3000");
+
+const MODULEHASH = String(process.env.MODULEHASH);
 
 ws.onopen = () => {
     console.log("Connected!");
-    ws.send("90a60a0dccc4ba24b84f93fb777af45cd7a70350")
+    ws.send(MODULEHASH)
 };
 
 ws.onmessage = (event) => {

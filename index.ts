@@ -58,7 +58,7 @@ Bun.serve<{key: string}>({
       if (!isVerified) return new Response("invalid request signature", { status: 401 });
       const json = JSON.parse(body);
 
-      // Webhook hanshake (not WebSocket related)
+      // Webhook handshake (not WebSocket related)
       if (json?.message == "PING") {
         const message = JSON.parse(body).message;
         console.log('PING WebHook handshake', {message});
