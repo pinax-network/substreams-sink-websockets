@@ -1,6 +1,22 @@
 import Database from "bun:sqlite";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { SQLITE_FILENAME } from "./config.js";
 
 export type KV = {key: string, value: string|number};
+
+export function createDb() {
+    // create folder if does not exists
+    if ( !fs.existsSync(SQLITE_FILENAME) ) {
+        fs.mkdirSync(path.parse(SQLITE_FILENAME).dir, {recursive: true});
+    }
+    const db = new Database(SQLITE_FILENAME, {create: true});
+
+    // create tables if does not exists
+    create(db, "moduleHash");
+    create(db, "traceId");
+    return db;
+}
 
 export function create(db: Database, table: string) {
     if ( !table ) throw new Error("table is required");
@@ -28,6 +44,6 @@ export function exists(db: Database, table: string, key: string ) {
     return select(db, table, key).length > 0;
 }
 
-// TO-DO: UPDATE
+// TO-DO: UPDATE (increment/decrement)
 // UPDATE product SET price = price + 50 WHERE id = 1
 // UPDATE {table} SET {column} = {column} + {value} WHERE {condition}

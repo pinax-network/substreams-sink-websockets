@@ -11,10 +11,8 @@ console.log(`Server listening on http://${HOSTNAME || "0.0.0.0"}:${PORT}`);
 console.log("Verifying with PUBLIC_KEY", PUBLIC_KEY);
 console.log("Reading SQLITE_FILENAME", SQLITE_FILENAME);
 
-// Create SQLite DB
-const db = new Database(SQLITE_FILENAME, {create: true}); // TO-DO as .env variable
-sqlite.create(db, "moduleHash");
-sqlite.create(db, "traceId");
+// SQLite DB
+const db = sqlite.createDb();
 
 Bun.serve<{key: string}>({
   port: PORT,
