@@ -1,6 +1,6 @@
 import { Server } from "bun";
 import { Database } from "bun:sqlite";
-import { HOSTNAME, PORT, PUBLIC_KEY } from "./src/config.js";
+import { HOSTNAME, PORT, PUBLIC_KEY, SQLITE_FILENAME } from "./src/config.js";
 import { verify } from "./src/verify.js";
 import { banner } from "./src/banner.js";
 import * as sqlite from "./src/sqlite.js";
@@ -9,9 +9,10 @@ import { checkHealth } from "./src/health.js";
 import { toJSON } from "./src/http.js";
 console.log(`Server listening on http://${HOSTNAME || "0.0.0.0"}:${PORT}`);
 console.log("Verifying with PUBLIC_KEY", PUBLIC_KEY);
+console.log("Reading SQLITE_FILENAME", SQLITE_FILENAME);
 
 // Create SQLite DB
-const db = new Database("./sqlite/db.sqlite", {create: true}); // TO-DO as .env variable
+const db = new Database(SQLITE_FILENAME, {create: true}); // TO-DO as .env variable
 sqlite.create(db, "moduleHash");
 sqlite.create(db, "traceId");
 
