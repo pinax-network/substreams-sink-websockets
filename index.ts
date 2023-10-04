@@ -1,5 +1,4 @@
 import { Server } from "bun";
-import { Database } from "bun:sqlite";
 import { HOSTNAME, PORT, PUBLIC_KEY, SQLITE_FILENAME } from "./src/config.js";
 import { verify } from "./src/verify.js";
 import { banner } from "./src/banner.js";
@@ -105,7 +104,6 @@ Bun.serve<{key: string}>({
       prometheus.active_connections.inc(1);
       prometheus.connected.inc(1);
       console.log('open', {key: ws.data.key, remoteAddress: ws.remoteAddress});
-      ws.send(JSON.stringify({message: "🎉 Connected!"}));
     },
     close(ws, code, reason) {
       prometheus.active_connections.dec(1);
