@@ -125,7 +125,7 @@ Bun.serve<{key: string}>({
       // ping
       // https://developers.binance.com/docs/binance-trading-api/websocket_api#test-connectivity
       if ( method === "ping" ) {
-        prometheus.total_pings.inc(1);
+        prometheus.pings.inc(1);
         console.log('ping', {key: ws.data.key, remoteAddress: ws.remoteAddress});
         ws.send(JSON.stringify({id, status: 200, result: {}}));
         return;

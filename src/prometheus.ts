@@ -37,4 +37,4 @@ export const connected = registerCounter('connected', 'Total connected clients')
 export const published_messages = registerCounter('published_messages', 'Total published messages');
 export const bytes_published = registerCounter('bytes_published', 'Total bytes published');
 export const disconnects = registerCounter('disconnects', 'Total disconnects');
-export const total_pings = registerCounter('total_pings', 'Total pings');
+export const pings = registerCounter('pings', 'Total pings');
