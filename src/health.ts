@@ -1,7 +1,9 @@
-export async function checkHealth(internalData: boolean) {
-    if (internalData == true){
-        return {data: "OK", status: { status: 200 }};
-    }
-    return {data: "Error: No connected webhooks", status: { status: 400 }};
+import { toText } from "./http.js";
+import { getSingleMetric } from "./prometheus.js";
 
+export async function checkHealth() {
+    if (await getSingleMetric("trace_id") > 0 ) {
+        return new Response("OK");
+    }
+    return toText("Error: No connected webhooks", 400);
 };

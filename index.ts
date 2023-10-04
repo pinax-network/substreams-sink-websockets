@@ -31,7 +31,7 @@ Bun.serve<{key: string}>({
     if ( req.method == "GET" ) {
       const { pathname } = new URL(req.url);
       if ( pathname === "/") return new Response(banner())
-      if ( pathname === "/health") return toJSON(await checkHealth(true));
+      if ( pathname === "/health") return await checkHealth();
       if ( pathname === "/metrics") return new Response(await prometheus.registry.metrics());
       if ( pathname === "/moduleHash") return toJSON(sqlite.selectAll(db, "moduleHash"));
       if ( pathname === "/traceId") return toJSON(sqlite.selectAll(db, "traceId"));
