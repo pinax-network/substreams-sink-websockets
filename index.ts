@@ -31,7 +31,7 @@ Bun.serve<{key: string}>({
     if ( req.method == "GET" ) {
       const { pathname } = new URL(req.url);
       if ( pathname === "/") return new Response(banner())
-      if ( pathname === "/health") return toJSON(await checkHealth(db));
+      if ( pathname === "/health") return toJSON(await checkHealth(true));
       if ( pathname === "/metrics") return new Response(await prometheus.registry.metrics());
       if ( pathname === "/moduleHash") return toJSON(sqlite.selectAll(db, "moduleHash"));
       if ( pathname === "/traceId") return toJSON(sqlite.selectAll(db, "traceId"));
@@ -64,7 +64,7 @@ Bun.serve<{key: string}>({
         return new Response("OK");
       }
       // Get data from Substreams metadata
-      const { clock, manifest } = json;
+      const { clock, manifest, session } = json;
       const moduleHash = manifest?.moduleHash;
 
       // publish message to subscribers
@@ -85,14 +85,16 @@ Bun.serve<{key: string}>({
       prometheus.webhook_messages.inc(1);
 
       //Metrics for trace id
-      const traceId = "654b2e1fd43e8468863595baaad68627"; // TO-DO: get traceId from Substreams metadata
+      const traceId = session.traceId;
+      const traceTimestamp = session.timestamp;
+      console.log(traceId, traceTimestamp)
       if (traceId) {
         prometheus.trace_id.inc(1);
       }
 
       // Upsert moduleHash into SQLite DB
       sqlite.replace(db, "moduleHash", moduleHash, timestamp);
-      sqlite.replace(db, "traceId", traceId, timestamp);
+      sqlite.replace(db, "traceId", traceId, traceTimestamp);
 
       return new Response("OK");
     }
