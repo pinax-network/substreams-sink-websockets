@@ -134,20 +134,29 @@ Bun.serve<{key: string}>({
       // Handle Subscribe
       // TO-DO: improve error formatting
       // https://github.com/pinax-network/substreams-sink-websockets/issues/9
-      const moduleHash = String(message);
-      if ( ws.isSubscribed(moduleHash) ) {
-        ws.send(JSON.stringify({message: `⚠️ Already subscribed to ${moduleHash}.`}));
-        console.log('already subscribed', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
+      if ( method === "subscribe" ) {
+        const { moduleHash } = params;
+        if ( ws.isSubscribed(moduleHash) ) {
+          ws.send(JSON.stringify({message: `⚠️ Already subscribed to ${moduleHash}.`}));
+          console.log('already subscribed', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
+          return;
+        }
+        if ( !sqlite.exists(db, "moduleHash", moduleHash) ) {
+          ws.send(JSON.stringify({message: `❌ ModuleHash ${moduleHash} not found.`}));
+          console.log('moduleHash not found', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
+          return;
+        }
+        ws.subscribe(moduleHash);
+        ws.send(JSON.stringify({message: `🚀 Subscribed to ${moduleHash}!`}));
+        console.log('subscribed', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
         return;
       }
-      if ( !sqlite.exists(db, "moduleHash", moduleHash) ) {
-        ws.send(JSON.stringify({message: `❌ ModuleHash ${moduleHash} not found.`}));
-        console.log('moduleHash not found', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
-        return;
-      }
-      ws.subscribe(moduleHash);
-      ws.send(JSON.stringify({message: `🚀 Subscribed to ${moduleHash}!`}));
-      console.log('subscribed', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
+      // ERROR Invalid method
+      const msg = 'Invalid \'method\' in JSON request.';
+      console.log(message, {key: ws.data.key, remoteAddress: ws.remoteAddress, message});
+      ws.send(JSON.stringify({id: null, status: 400, error: {msg}}));
+      ws.close();
+      return;
     },
   },
 });
