@@ -65,7 +65,8 @@ Bun.serve<{key: string}>({
       }
       // Get data from Substreams metadata
       const { clock, manifest, session } = json;
-      const moduleHash = manifest?.moduleHash;
+      const { moduleHash } = manifest;
+      const { traceId } = session;
 
       // publish message to subscribers
       const bytes = server.publish(moduleHash, body);
@@ -81,20 +82,12 @@ Bun.serve<{key: string}>({
         prometheus.published_messages.inc(1);
       }
       // Metrics for incoming WebHook
-      prometheus.webhook_module_hash.labels({moduleHash}).inc(1);
-      prometheus.webhook_messages.inc(1);
-
-      //Metrics for trace id
-      const traceId = session.traceId;
-      const traceTimestamp = session.timestamp;
-      console.log(traceId, traceTimestamp)
-      if (traceId) {
-        prometheus.trace_id.inc(1);
-      }
+      prometheus.webhook_messages.labels({moduleHash}).inc(1);
+      prometheus.trace_id.labels({traceId}).inc(1);
 
       // Upsert moduleHash into SQLite DB
       sqlite.replace(db, "moduleHash", moduleHash, timestamp);
-      sqlite.replace(db, "traceId", traceId, traceTimestamp);
+      sqlite.replace(db, "traceId", traceId, timestamp);
 
       return new Response("OK");
     }

@@ -28,8 +28,8 @@ export async function getSingleMetric(name: string) {
 }
 
 // Webhook metrics
-export const webhook_messages = registerCounter('webhook_messages', 'Total Webhook messages received');
-export const webhook_module_hash = registerCounter('webhook_module_hash', 'Total Webhook module hashes message received', ['moduleHash']);
+export const webhook_messages = registerCounter('webhook_messages', 'Total Webhook messages received', ['moduleHash']);
+export const trace_id = registerGauge('trace_id', 'Total trace ids', ['traceId']);
 
 // WebSocket metrics
 export const active_connections = registerGauge('active_connections', 'All active connections');
@@ -38,4 +38,3 @@ export const published_messages = registerCounter('published_messages', 'Total p
 export const bytes_published = registerCounter('bytes_published', 'Total bytes published');
 export const disconnects = registerCounter('disconnects', 'Total disconnects');
 export const total_pings = registerCounter('total_pings', 'Total pings');
-export const trace_id = registerGauge('trace_id', 'Total trace ids')
