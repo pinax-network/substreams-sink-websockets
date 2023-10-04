@@ -6,6 +6,7 @@ import * as sqlite from "./src/sqlite.js";
 import * as prometheus from "./src/prometheus.js";
 import { checkHealth } from "./src/health.js";
 import { toJSON } from "./src/http.js";
+import { parseMessage } from "./src/parseMessage.js";
 console.log(`Server listening on http://${HOSTNAME || "0.0.0.0"}:${PORT}`);
 console.log("Verifying with PUBLIC_KEY", PUBLIC_KEY);
 console.log("Reading SQLITE_FILENAME", SQLITE_FILENAME);
@@ -111,19 +112,35 @@ Bun.serve<{key: string}>({
       console.log('close', {key: ws.data.key, remoteAddress: ws.remoteAddress, code, reason});
     },
     message(ws, message) {
-      // Handle Pings
-      // TO-DO: maybe to be removed??
-      // https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers#pings_and_pongs_the_heartbeat_of_websockets
-      if ( message === "0x9" || message === "pong" ) {
+      const { id, method, params } = parseMessage(message);
+
+      // validate request
+      if ( id === null ) {
+        const msg = 'Missing required \'id\' in JSON request.';
+        console.log(message, {key: ws.data.key, remoteAddress: ws.remoteAddress, message});
+        ws.send(JSON.stringify({id: null, status: 400, error: {msg}}));
+        ws.close();
+        return;
+      }
+      if ( method === null ) {
+        const msg = 'Missing required \'method\' in JSON request.';
+        console.log(message, {key: ws.data.key, remoteAddress: ws.remoteAddress, message});
+        ws.send(JSON.stringify({id: null, status: 400, error: {msg}}));
+        ws.close();
+        return;
+      }
+      // ping
+      // https://developers.binance.com/docs/binance-trading-api/websocket_api#test-connectivity
+      if ( method === "ping" ) {
         prometheus.total_pings.inc(1);
         console.log('ping', {key: ws.data.key, remoteAddress: ws.remoteAddress});
-        ws.pong();
-        if ( message == "0x9" ) ws.send("0xA");
-        else ws.send("pong");
+        ws.send(JSON.stringify({id, status: 200, result: {}}));
         return;
       }
 
       // Handle Subscribe
+      // TO-DO: improve error formatting
+      // https://github.com/pinax-network/substreams-sink-websockets/issues/9
       const moduleHash = String(message);
       if ( ws.isSubscribed(moduleHash) ) {
         ws.send(JSON.stringify({message: `⚠️ Already subscribed to ${moduleHash}.`}));

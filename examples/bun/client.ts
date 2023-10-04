@@ -1,11 +1,13 @@
-import "dotenv/config"
+import { randomUUID } from "crypto";
+
 const ws = new WebSocket("ws://localhost:3000");
 
-const MODULEHASH = String(process.env.MODULEHASH);
-
 ws.onopen = () => {
-    console.log("Connected!");
-    ws.send(MODULEHASH)
+    console.log("connected");
+    ws.send(JSON.stringify({
+        id: randomUUID(),
+        method: "ping"
+    }));
 };
 
 ws.onmessage = (event) => {
