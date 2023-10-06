@@ -1,6 +1,6 @@
-# [`Substreams`](https://substreams.streamingfast.io/) Sink WebSockets
+# [`Substreams`](https://substreams.streamingfast.io/) Service WebSockets
 
-> `substreams-sink-websockets` is a tool that allows developers to pipe data extracted from a blockchain to WebSockets.
+> `substreams-service-websockets` is a tool that allows developers to pipe data extracted from a blockchain to WebSockets.
 
 ## Quickstart
 
@@ -25,7 +25,7 @@ PUBLIC_KEY=...
 ## Help
 
 ```
-$ substreams-sink-websockets --help
+$ substreams-service-websockets --help
 
 TO-DO...
 ```
