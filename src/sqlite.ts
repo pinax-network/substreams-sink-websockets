@@ -1,16 +1,15 @@
 import Database from "bun:sqlite";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { SQLITE_FILENAME } from "./config.js";
 
 export type KV = {key: string, value: string|number};
 
-export function createDb() {
+export function createDb(filename: string) {
     // create folder if does not exists
-    if ( !fs.existsSync(SQLITE_FILENAME) ) {
-        fs.mkdirSync(path.parse(SQLITE_FILENAME).dir, {recursive: true});
+    if ( !fs.existsSync(filename) ) {
+        fs.mkdirSync(path.parse(filename).dir, {recursive: true});
     }
-    const db = new Database(SQLITE_FILENAME, {create: true});
+    const db = new Database(filename, {create: true});
 
     // create tables if does not exists
     create(db, "moduleHash");

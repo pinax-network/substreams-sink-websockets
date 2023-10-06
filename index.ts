@@ -12,7 +12,7 @@ console.log("Verifying with PUBLIC_KEY", PUBLIC_KEY);
 console.log("Reading SQLITE_FILENAME", SQLITE_FILENAME);
 
 // SQLite DB
-const db = sqlite.createDb();
+const db = sqlite.createDb(SQLITE_FILENAME);
 
 Bun.serve<{key: string}>({
   port: PORT,
