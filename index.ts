@@ -130,6 +130,11 @@ Bun.serve<{key: string}>({
         ws.send(JSON.stringify({id, status: 200, result: {}}));
         return;
       }
+      if ( method === "time" ) {
+        console.log('time', {key: ws.data.key, remoteAddress: ws.remoteAddress});
+        ws.send(JSON.stringify({id, status: 200, result: {serverTime: Number(Date.now())}}));
+        return;
+      }
 
       // Handle Subscribe
       // TO-DO: improve error formatting
