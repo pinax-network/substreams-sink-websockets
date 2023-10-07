@@ -6,8 +6,9 @@ export type KV = {key: string, value: string|number};
 
 export function createDb(filename: string) {
     // create folder if does not exists
-    if ( !fs.existsSync(filename) ) {
-        fs.mkdirSync(path.parse(filename).dir, {recursive: true});
+    const {dir} = path.parse(filename);
+    if ( !fs.existsSync(dir) ) {
+        fs.mkdirSync(dir, {recursive: true});
     }
     const db = new Database(filename, {create: true});
 
