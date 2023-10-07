@@ -1,7 +1,7 @@
-name: Build
+name: Bun executable
 on:
   release:
-    types: [published]
+    types: [ published ]
 
 permissions:
   contents: write
