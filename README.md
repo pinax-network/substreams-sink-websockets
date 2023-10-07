@@ -9,7 +9,32 @@
 ## Quickstart
 
 ```bash
-$ bunx substreams-sink-websockets
+$ bun install
+$ bun dev
+```
+
+## [`Bun` Binary Releases](https://github.com/pinax-network/substreams-sink-websockets/releases)
+
+```
+$ wget https://github.com/pinax-network/substreams-sink-websockets/releases/download/v0.1.4/substreams-sink-websockets
+$ chmod +x ./substreams-sink-websockets
+```
+
+## Docker environment
+
+Pull from GitHub Container registry
+```bash
+docker pull ghcr.io/pinax-network/substreams-sink-websockets:latest
+```
+
+Build from source
+```bash
+docker build -t substreams-sink-websockets .
+```
+
+Run with `.env` file
+```bash
+docker run -it --rm --env-file .env substreams-sink-websockets run
 ```
 
 ## `.env` Environment variables
@@ -18,6 +43,10 @@ $ bunx substreams-sink-websockets
 PORT=3000
 PUBLIC_KEY=...
 ```
+
+## Standalone Bun executable
+
+https://github.com/pinax-network/substreams-sink-websockets/releases
 
 ## 📖 References
 
