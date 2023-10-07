@@ -15,6 +15,8 @@ $ bun dev
 
 ## [`Bun` Binary Releases](https://github.com/pinax-network/substreams-sink-websockets/releases)
 
+> Linux Only
+
 ```
 $ wget https://github.com/pinax-network/substreams-sink-websockets/releases/download/v0.1.5/substreams-sink-websockets
 $ chmod +x ./substreams-sink-websockets

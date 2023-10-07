@@ -1,6 +1,6 @@
 .env
 package-lock.json
-substreams-service-websockets
+substreams-sink-websockets
 
 # Based on https://raw.githubusercontent.com/github/gitignore/main/Node.gitignore
 
