@@ -2,9 +2,21 @@
 
 > `substreams-sink-websockets` is a tool that allows developers to pipe data extracted from a blockchain to WebSockets.
 
+## WebSockets examples
+
+- [`Bun`](/examples/bun) - https://bun.sh/
+- [React Native](/examples/react-native) - https://expo.dev/
+- [HTML](/examples/html)
+- [HTTP POST requests](/examples/post-http)
+
 ## Requirements
 
 - [Substreams Sink Webhook](https://github.com/pinax-network/substreams-sink-webhook)
+
+## 📖 References
+
+- [**Substreams** documentation](https://substreams.streamingfast.io/)
+- [Bun WebSockets](https://bun.sh/docs/api/websockets)
 
 ## Quickstart
 
@@ -20,6 +32,38 @@ $ bun dev
 ```
 $ wget https://github.com/pinax-network/substreams-sink-websockets/releases/download/v0.1.7/substreams-sink-websockets
 $ chmod +x ./substreams-sink-websockets
+```
+
+## `.env` Environment variables
+
+```env
+# required
+PUBLIC_KEY="<Ed25519 public key>"
+
+# optional
+PORT=3000
+SQLITE_FILENAME=db.sqlite
+HOSTNAME=0.0.0.0
+VERBOSE=true
+```
+
+## Help
+
+```bash
+$ substreams-sink-websockets --help
+
+Usage: substreams-sink-websockets [options]
+
+Substreams Sink Websockets
+
+Options:
+  --public-key <string>       (required) Ed25519 public key (env: PUBLIC_KEY)
+  --port <int>                Server listen on HTTP port (default: 3000, env: PORT)
+  --hostname <string>         Server listen on HTTP hostname (default: "0.0.0.0", env: HOSTNAME)
+  --sqlite-filename <string>  SQLite database filename (default: "db.sqlite", env: SQLITE_FILENAME)
+  --verbose <boolean>         Enable verbose logging (default: false, env: VERBOSE)
+  -V, --version               output the version number
+  -h, --help                  display help for command
 ```
 
 ## Docker environment
@@ -38,22 +82,6 @@ Run with `.env` file
 ```bash
 docker run -it --rm --env-file .env ghcr.io/pinax-network/substreams-sink-websockets
 ```
-
-## `.env` Environment variables
-
-```env
-PORT=3000
-PUBLIC_KEY=...
-```
-
-## Standalone Bun executable
-
-https://github.com/pinax-network/substreams-sink-websockets/releases
-
-## 📖 References
-
-- [**Substreams** documentation](https://substreams.streamingfast.io/)
-- [Bun WebSockets](https://bun.sh/docs/api/websockets)
 
 ## Features
 

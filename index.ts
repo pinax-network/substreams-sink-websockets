@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-
 import { Server } from "bun";
-import { HOSTNAME, PORT, PUBLIC_KEY, SQLITE_FILENAME } from "./src/config.js";
+import { HOSTNAME, PORT, PUBLIC_KEY, SQLITE_FILENAME, VERBOSE } from "./src/config.js";
 import { verify } from "./src/verify.js";
 import { banner } from "./src/banner.js";
 import * as sqlite from "./src/sqlite.js";
@@ -9,10 +8,12 @@ import * as prometheus from "./src/prometheus.js";
 import { checkHealth } from "./src/health.js";
 import { toJSON } from "./src/http.js";
 import { parseMessage } from "./src/parseMessage.js";
-console.log(`Server listening on http://${HOSTNAME || "0.0.0.0"}:${PORT}`);
+
+console.log(`Server listening on http://${HOSTNAME}:${PORT}`);
 console.log("Verifying with PUBLIC_KEY", PUBLIC_KEY);
 console.log("Reading SQLITE_FILENAME", SQLITE_FILENAME);
 
+console.log(VERBOSE);
 // SQLite DB
 const db = sqlite.createDb(SQLITE_FILENAME);
 

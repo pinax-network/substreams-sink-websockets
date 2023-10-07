@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Substreams Sink Websockets",
   "name": "substreams-sink-websockets",
   "homepage": "https://github.com/pinax-network/substreams-sink-websockets",
@@ -12,6 +12,7 @@
     "dev": "bun run --watch index.ts"
   },
   "dependencies": {
+    "commander": "latest",
     "dotenv": "latest",
     "prom-client": "latest",
     "tweetnacl": "latest"
