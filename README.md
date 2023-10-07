@@ -1,4 +1,4 @@
-# [`Substreams`](https://substreams.streamingfast.io/) sink WebSockets
+# [`Substreams`](https://substreams.streamingfast.io/) Sink WebSockets
 
 > `substreams-sink-websockets` is a tool that allows developers to pipe data extracted from a blockchain to WebSockets.
 
