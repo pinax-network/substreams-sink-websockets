@@ -18,7 +18,7 @@ $ bun dev
 > Linux Only
 
 ```
-$ wget https://github.com/pinax-network/substreams-sink-websockets/releases/download/v0.1.6/substreams-sink-websockets
+$ wget https://github.com/pinax-network/substreams-sink-websockets/releases/download/v0.1.7/substreams-sink-websockets
 $ chmod +x ./substreams-sink-websockets
 ```
 
