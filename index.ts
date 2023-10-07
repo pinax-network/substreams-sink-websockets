@@ -135,7 +135,8 @@ Bun.serve<{key: string}>({
       }
       if ( method === "time" ) {
         logger.info('time', {key: ws.data.key, remoteAddress: ws.remoteAddress});
-        ws.send(JSON.stringify({id, status: 200, result: {serverTime: Number(Date.now())}}));
+        const serverTime = Number(Date.now());
+        ws.send(JSON.stringify({id, status: 200, result: {serverTime}}));
         return;
       }
 
