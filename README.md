@@ -36,7 +36,7 @@ docker build -t substreams-sink-websockets .
 
 Run with `.env` file
 ```bash
-docker run -it --rm --env-file .env substreams-sink-websockets run
+docker run -it --rm --env-file .env ghcr.io/pinax-network/substreams-sink-websockets
 ```
 
 ## `.env` Environment variables
