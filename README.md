@@ -5,15 +5,8 @@
 ## Quickstart
 
 ```bash
-$ bun install
-$ bun run dev
+$ bunx pinax-network/substreams-sink-websockets
 ```
-
-## 📖 References
-
-- [**Substreams** documentation](https://substreams.streamingfast.io/)
-- [Bun WebSockets](https://bun.sh/docs/api/websockets)
-
 
 ## `.env` Environment variables
 
@@ -22,22 +15,19 @@ PORT=3000
 PUBLIC_KEY=...
 ```
 
-## Help
+## 📖 References
 
-```
-$ substreams-service-websockets --help
-
-TO-DO...
-```
+- [**Substreams** documentation](https://substreams.streamingfast.io/)
+- [Bun WebSockets](https://bun.sh/docs/api/websockets)
 
 ## Features
 
 - [x] Accept Substreams Webhook message `POST /`
-- [ ] Client connect to WebSocket service
+- [x] Client connect to WebSocket service
 - [x] Verify tweetnacl Substreams Webhook message
-- [ ] Send WebSocket messages
-- [ ] Unit testing
-- [ ] Prometheus Metrics `GET /metrics`
-- [ ] Health check `GET /health`
+- [x] Send WebSocket messages
+- [x] Unit testing
+- [x] Prometheus Metrics `GET /metrics`
+- [x] Health check `GET /health`
 - [x] Banner `GET /`
 - [ ] Commander CLI
