@@ -13,7 +13,6 @@ console.log(`Server listening on http://${HOSTNAME}:${PORT}`);
 console.log("Verifying with PUBLIC_KEY", PUBLIC_KEY);
 console.log("Reading SQLITE_FILENAME", SQLITE_FILENAME);
 
-console.log(VERBOSE);
 // SQLite DB
 const db = sqlite.createDb(SQLITE_FILENAME);
 
