@@ -1,24 +1,13 @@
 {
+  "private": true,
   "version": "0.1.4",
   "description": "Substreams Sink Websockets",
   "name": "substreams-sink-websockets",
   "homepage": "https://github.com/pinax-network/substreams-sink-websockets",
   "type": "module",
-  "types": "./dist/index.d.ts",
-  "bin": {
-    "substreams-sink-websockets": "./dist/bun/index.js"
-  },
-  "exports": {
-    ".": "./dist/index.js"
-  },
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "start": "bun run index.ts",
-    "prepublishOnly": "tsc && npm run bundle",
     "test": "bun test",
-    "bundle": "bun build index.ts --outfile ./dist/bun/index.js --target bun",
     "build": "bun build --compile ./index.ts --outfile substreams-sink-websockets",
     "dev": "bun run --watch index.ts"
   },
