@@ -1,5 +1,4 @@
 {
-  "private": true,
   "version": "0.1.4",
   "description": "Substreams Sink Websockets",
   "name": "substreams-sink-websockets",
