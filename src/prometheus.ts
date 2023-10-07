@@ -1,4 +1,5 @@
 import client, { Counter, CounterConfiguration, Gauge, GaugeConfiguration } from 'prom-client';
+import { logger } from './logger.js';
 
 export const registry = new client.Registry();
 
@@ -8,7 +9,7 @@ export function registerCounter(name: string, help = "help", labelNames: string[
         registry.registerMetric(new Counter({ name, help, labelNames, ...config }));
         return registry.getSingleMetric(name) as Counter;
     } catch (e) {
-        console.error(e);
+        logger.error(e);
     }
 }
 
@@ -17,7 +18,7 @@ export function registerGauge(name: string, help = "help", labelNames: string[] 
         registry.registerMetric(new Gauge({ name, help, labelNames, ...config }));
         return registry.getSingleMetric(name) as Gauge;
     } catch (e) {
-        console.error(e);
+        logger.error(e);
     }
 }
 

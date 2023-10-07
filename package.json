@@ -15,6 +15,7 @@
     "commander": "latest",
     "dotenv": "latest",
     "prom-client": "latest",
+    "tslog": "latest",
     "tweetnacl": "latest"
   },
   "devDependencies": {

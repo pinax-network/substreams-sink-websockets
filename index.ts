@@ -8,10 +8,11 @@ import * as prometheus from "./src/prometheus.js";
 import { checkHealth } from "./src/health.js";
 import { toJSON } from "./src/http.js";
 import { parseMessage } from "./src/parseMessage.js";
+import { logger } from "./src/logger.js";
 
-console.log(`Server listening on http://${HOSTNAME}:${PORT}`);
-console.log("Verifying with PUBLIC_KEY", PUBLIC_KEY);
-console.log("Reading SQLITE_FILENAME", SQLITE_FILENAME);
+logger.info(`Server listening on http://${HOSTNAME}:${PORT}`);
+logger.info("Verifying with PUBLIC_KEY", PUBLIC_KEY);
+logger.info("Reading SQLITE_FILENAME", SQLITE_FILENAME);
 
 // SQLite DB
 const db = sqlite.createDb(SQLITE_FILENAME);
@@ -25,7 +26,7 @@ Bun.serve<{key: string}>({
     const key = req.headers.get("sec-websocket-key")
     const success = server.upgrade(req, {data: { key }});
     if (success) {
-      console.log('upgrade', {key});
+      logger.info('upgrade', {key});
       return;
     }
 
@@ -46,7 +47,7 @@ Bun.serve<{key: string}>({
       const timestamp = req.headers.get("x-signature-timestamp");
       const signature = req.headers.get("x-signature-ed25519");
       const body = await req.text();
-      console.log('POST', {timestamp, signature, body});
+      logger.info('POST', {timestamp, signature, body});
 
       // validate request
       if (!timestamp) return new Response("missing required timestamp in headers", { status: 400 });
@@ -62,7 +63,7 @@ Bun.serve<{key: string}>({
       // Webhook handshake (not WebSocket related)
       if (json?.message == "PING") {
         const message = JSON.parse(body).message;
-        console.log('PING WebHook handshake', {message});
+        logger.info('PING WebHook handshake', {message});
         return new Response("OK");
       }
       // Get data from Substreams metadata
@@ -72,7 +73,7 @@ Bun.serve<{key: string}>({
 
       // publish message to subscribers
       const bytes = server.publish(moduleHash, body);
-      console.log('server.publish', {bytes, block: clock.number, timestamp: clock.timestamp, moduleHash});
+      logger.info('server.publish', {bytes, block: clock.number, timestamp: clock.timestamp, moduleHash});
 
       // Metrics for published messages
       // response is:
@@ -99,12 +100,12 @@ Bun.serve<{key: string}>({
     open(ws) {
       prometheus.active_connections.inc(1);
       prometheus.connected.inc(1);
-      console.log('open', {key: ws.data.key, remoteAddress: ws.remoteAddress});
+      logger.info('open', {key: ws.data.key, remoteAddress: ws.remoteAddress});
     },
     close(ws, code, reason) {
       prometheus.active_connections.dec(1);
       prometheus.disconnects.inc(1);
-      console.log('close', {key: ws.data.key, remoteAddress: ws.remoteAddress, code, reason});
+      logger.info('close', {key: ws.data.key, remoteAddress: ws.remoteAddress, code, reason});
     },
     message(ws, message) {
       const { id, method, params } = parseMessage(message);
@@ -112,14 +113,14 @@ Bun.serve<{key: string}>({
       // validate request
       if ( id === null ) {
         const msg = 'Missing required \'id\' in JSON request.';
-        console.log(message, {key: ws.data.key, remoteAddress: ws.remoteAddress, message});
+        logger.error(message, {key: ws.data.key, remoteAddress: ws.remoteAddress, message});
         ws.send(JSON.stringify({id: null, status: 400, error: {msg}}));
         ws.close();
         return;
       }
       if ( method === null ) {
         const msg = 'Missing required \'method\' in JSON request.';
-        console.log(message, {key: ws.data.key, remoteAddress: ws.remoteAddress, message});
+        logger.error(message, {key: ws.data.key, remoteAddress: ws.remoteAddress, message});
         ws.send(JSON.stringify({id: null, status: 400, error: {msg}}));
         ws.close();
         return;
@@ -128,12 +129,12 @@ Bun.serve<{key: string}>({
       // https://developers.binance.com/docs/binance-trading-api/websocket_api#test-connectivity
       if ( method === "ping" ) {
         prometheus.pings.inc(1);
-        console.log('ping', {key: ws.data.key, remoteAddress: ws.remoteAddress});
+        logger.info('ping', {key: ws.data.key, remoteAddress: ws.remoteAddress});
         ws.send(JSON.stringify({id, status: 200, result: {}}));
         return;
       }
       if ( method === "time" ) {
-        console.log('time', {key: ws.data.key, remoteAddress: ws.remoteAddress});
+        logger.info('time', {key: ws.data.key, remoteAddress: ws.remoteAddress});
         ws.send(JSON.stringify({id, status: 200, result: {serverTime: Number(Date.now())}}));
         return;
       }
@@ -145,22 +146,22 @@ Bun.serve<{key: string}>({
         const { moduleHash } = params;
         if ( ws.isSubscribed(moduleHash) ) {
           ws.send(JSON.stringify({message: `⚠️ Already subscribed to ${moduleHash}.`}));
-          console.log('already subscribed', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
+          logger.warn('already subscribed', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
           return;
         }
         if ( !sqlite.exists(db, "moduleHash", moduleHash) ) {
           ws.send(JSON.stringify({message: `❌ ModuleHash ${moduleHash} not found.`}));
-          console.log('moduleHash not found', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
+          logger.error('moduleHash not found', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
           return;
         }
         ws.subscribe(moduleHash);
         ws.send(JSON.stringify({message: `🚀 Subscribed to ${moduleHash}!`}));
-        console.log('subscribed', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
+        logger.info('subscribed', {key: ws.data.key, remoteAddress: ws.remoteAddress, moduleHash});
         return;
       }
       // ERROR Invalid method
       const msg = 'Invalid \'method\' in JSON request.';
-      console.log(message, {key: ws.data.key, remoteAddress: ws.remoteAddress, message});
+      logger.error(message, {key: ws.data.key, remoteAddress: ws.remoteAddress, message});
       ws.send(JSON.stringify({id: null, status: 400, error: {msg}}));
       ws.close();
       return;
