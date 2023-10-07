@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { Server } from "bun";
 import { HOSTNAME, PORT, PUBLIC_KEY, SQLITE_FILENAME } from "./src/config.js";
 import { verify } from "./src/verify.js";

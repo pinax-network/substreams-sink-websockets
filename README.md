@@ -1,11 +1,15 @@
-# [`Substreams`](https://substreams.streamingfast.io/) Service WebSockets
+# [`Substreams`](https://substreams.streamingfast.io/) sink WebSockets
 
-> `substreams-service-websockets` is a tool that allows developers to pipe data extracted from a blockchain to WebSockets.
+> `substreams-sink-websockets` is a tool that allows developers to pipe data extracted from a blockchain to WebSockets.
+
+## Requirements
+
+- [Substreams Sink Webhook](https://github.com/pinax-network/substreams-sink-webhook)
 
 ## Quickstart
 
 ```bash
-$ bunx pinax-network/substreams-sink-websockets
+$ bunx substreams-sink-websockets
 ```
 
 ## `.env` Environment variables

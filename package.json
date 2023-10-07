@@ -1,10 +1,13 @@
 {
-  "version": "0.1.0",
-  "description": "Substreams Service Websockets",
-  "name": "substreams-service-websockets",
+  "version": "0.1.1",
+  "description": "Substreams Sink Websockets",
+  "name": "substreams-sink-websockets",
   "homepage": "https://github.com/pinax-network/substreams-sink-websockets",
   "type": "module",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "substreams-sink-websockets": "./dist/index.js"
+  },
   "exports": {
     ".": "./dist/index.js"
   },
@@ -12,7 +15,7 @@
     "start": "bun run index.ts",
     "prepublish": "tsc",
     "test": "bun test",
-    "build": "bun build --compile ./index.ts --outfile substreams-service-websockets",
+    "build": "bun build --compile ./index.ts --outfile substreams-sink-websockets",
     "dev": "bun run --watch index.ts"
   },
   "dependencies": {

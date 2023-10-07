@@ -20,4 +20,4 @@ jobs:
       - uses: softprops/action-gh-release@v1
         with:
           files: |
-            substreams-service-websockets
+            substreams-sink-websockets
