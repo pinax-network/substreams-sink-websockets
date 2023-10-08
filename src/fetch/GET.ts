@@ -1,11 +1,11 @@
-import { banner } from "./banner.js";
-import { checkHealth } from "./health.js";
-import * as prometheus from "./prometheus.js";
-import * as sqlite from "./sqlite.js";
-import { db } from "../index.js";
-import { toJSON } from "./http.js";
+import { banner } from "../banner.js";
+import { checkHealth } from "../health.js";
+import * as prometheus from "../prometheus.js";
+import * as sqlite from "../sqlite.js";
+import { db } from "../../index.js";
+import { toJSON } from "../http.js";
 import { Server } from "bun";
-import { logger } from "./logger.js";
+import { logger } from "../logger.js";
 
 export default async function (req: Request, server: Server) {
     // Bun automatically returns a 101 Switching Protocols

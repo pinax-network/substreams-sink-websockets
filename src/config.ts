@@ -2,6 +2,7 @@ import "dotenv/config";
 
 import pkg from "../package.json" assert { type: "json" };
 import { Command, Option } from "commander";
+import { logger } from "./logger.js";
 
 // default values
 export const DEFAULT_PORT = 3000
@@ -33,3 +34,7 @@ export const VERBOSE: boolean = opts.verbose === "true" ? true : false;
 if (!PUBLIC_KEY) throw new Error("PUBLIC_KEY is required");
 if (Buffer.from(PUBLIC_KEY, "hex").length !== 32) throw new Error("PUBLIC_KEY must be a 32 byte hex string");
 if (!Number.isInteger(PORT)) throw new Error("PORT must be an integer");
+
+logger.info(`Server listening on http://${HOSTNAME}:${PORT}`);
+logger.info("Verifying with PUBLIC_KEY", PUBLIC_KEY);
+logger.info("Reading SQLITE_FILENAME", SQLITE_FILENAME);

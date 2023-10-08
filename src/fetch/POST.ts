@@ -1,9 +1,9 @@
-import * as prometheus from "./prometheus.js";
-import * as sqlite from "./sqlite.js";
-import { db } from "../index.js";
-import { logger } from "./logger.js";
-import { verify } from "./verify.js";
-import { PUBLIC_KEY } from "./config.js";
+import * as prometheus from "../prometheus.js";
+import * as sqlite from "../sqlite.js";
+import { db } from "../../index.js";
+import { logger } from "../logger.js";
+import { verify } from "../verify.js";
+import { PUBLIC_KEY } from "../config.js";
 import { Server } from "bun";
 
 export default async function (req: Request, server: Server) {

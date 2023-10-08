@@ -1,7 +1,6 @@
 import { ServerWebSocket } from "bun";
 import { logger } from "../logger.js";
 import { ServerWebSocketData } from "../../index.js";
-import * as prometheus from "../prometheus.js";
 
 // https://developers.binance.com/docs/binance-trading-api/websocket_api#check-server-time
 export default function (ws: ServerWebSocket<ServerWebSocketData>, id?: string) {

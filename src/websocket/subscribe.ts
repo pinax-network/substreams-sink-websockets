@@ -18,6 +18,8 @@ export default function (ws: ServerWebSocket<ServerWebSocketData>, params: {[key
     } else {
         if ( !sqlite.exists(db, "moduleHash", moduleHash) ) throw new Error(`ModuleHash [${moduleHash}] not found.`);
     }
+
+    // TO-DO add Prometheus metrics to track total subscriptions by topic
     ws.subscribe(topic);
     logger.info('subscribed', {id, key: ws.data.key, remoteAddress: ws.remoteAddress, topic, params});
 }
