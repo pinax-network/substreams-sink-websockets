@@ -7,7 +7,7 @@
 | Method      | Params                | Description
 |-------------|-----------------------| ----------------------|
 | `ping`      |                       | Test connectivity to the WebSocket API.
-| `time`      |                       | Test connectivity to the WebSocket API and get the current server time.
+| `time`      |                       | Get the current server time to the WebSocket API.
 | `subscribe` | `{chain, moduleHash}` | Subscribe to a Substreams module hash by chain.
 
 Send Text Message with the following JSON payloads
