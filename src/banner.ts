@@ -25,7 +25,7 @@ export function banner()  {
 
     HTTP POST (Ed25519 signature)
         / {timestamp, signature, body}
-        / {"message":"PING"}
+        / {"message": "PING"}
 
     WebSocket
         Message {"method": "ping"}

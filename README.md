@@ -2,6 +2,40 @@
 
 > `substreams-sink-websockets` is a tool that allows developers to pipe data extracted from a blockchain to WebSockets.
 
+## WebSockets API
+
+| Method      | Params                |
+|-------------|-----------------------|
+| `ping`      |                       |
+| `time`      |                       |
+| `subscribe` | `{chain, moduleHash}` |
+
+Send Text Message with the following JSON payloads
+
+### `subscribe` Request
+
+```json
+{
+    "method": "subscribe",
+    "params": {
+        "chain": "bsc",
+        "moduleHash": "0a363b2a63aadb76a525208f1973531d3616fbae"
+    }
+}
+```
+
+## REST API
+
+| Pathname          | Description           |
+|-------------------|-----------------------|
+| GET `/health`     | Health check
+| GET `/metrics`    | Prometheus metrics
+| GET `/chain`      | Returns all available `chain`
+| GET `/traceId`    | Returns all `traceId` by `chain`
+| GET `/moduleHash` | Returns all available `moduleHash` by `chain`
+| POST `/` {timestamp, signature, body}   | Webhook HTTP POST (Ed25519 signature)
+| POST `/` {"message": "PING"}            | Webhook HTTP POST Ping
+
 ## WebSockets examples
 
 - [`Bun`](/examples/bun) - https://bun.sh/
@@ -12,11 +46,6 @@
 ## Requirements
 
 - [Substreams Sink Webhook](https://github.com/pinax-network/substreams-sink-webhook)
-
-## 📖 References
-
-- [**Substreams** documentation](https://substreams.streamingfast.io/)
-- [Bun WebSockets](https://bun.sh/docs/api/websockets)
 
 ## Quickstart
 
@@ -83,14 +112,7 @@ Run with `.env` file
 docker run -it --rm --env-file .env ghcr.io/pinax-network/substreams-sink-websockets
 ```
 
-## Features
+## 📖 References
 
-- [x] Accept Substreams Webhook message `POST /`
-- [x] Client connect to WebSocket service
-- [x] Verify tweetnacl Substreams Webhook message
-- [x] Send WebSocket messages
-- [x] Unit testing
-- [x] Prometheus Metrics `GET /metrics`
-- [x] Health check `GET /health`
-- [x] Banner `GET /`
-- [ ] Commander CLI
+- [**Substreams** documentation](https://substreams.streamingfast.io/)
+- [Bun WebSockets](https://bun.sh/docs/api/websockets)
