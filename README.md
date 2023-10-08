@@ -4,11 +4,11 @@
 
 ## WebSockets API
 
-| Method      | Params                |
-|-------------|-----------------------|
-| `ping`      |                       |
-| `time`      |                       |
-| `subscribe` | `{chain, moduleHash}` |
+| Method      | Params                | Description
+|-------------|-----------------------| ----------------------|
+| `ping`      |                       | Test connectivity to the WebSocket API.
+| `time`      |                       | Test connectivity to the WebSocket API and get the current server time.
+| `subscribe` | `{chain, moduleHash}` | Subscribe to a Substreams module hash by chain.
 
 Send Text Message with the following JSON payloads
 
