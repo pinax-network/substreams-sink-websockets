@@ -20,6 +20,7 @@ export function banner()  {
         /health
         /metrics
         /moduleHash
+        /moduleHashByChain
         /traceId
         /chain
 

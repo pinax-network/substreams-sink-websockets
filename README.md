@@ -26,13 +26,14 @@ Send Text Message with the following JSON payloads
 
 ## REST API
 
-| Pathname          | Description           |
-|-------------------|-----------------------|
-| GET `/health`     | Health check
-| GET `/metrics`    | Prometheus metrics
-| GET `/chain`      | Returns all available `chain`
-| GET `/traceId`    | Returns all `traceId` by `chain`
-| GET `/moduleHash` | Returns all available `moduleHash` by `chain`
+| Pathname                  | Description           |
+|---------------------------|-----------------------|
+| GET `/health`             | Health check
+| GET `/metrics`            | Prometheus metrics
+| GET `/chain`              | Returns all available `chain`
+| GET `/traceId`            | Returns all `traceId` by `chain`
+| GET `/moduleHash`         | Returns all available `moduleHash`
+| GET `/moduleHashByChain`  | Returns all available `moduleHash` by `chain`
 | POST `/` {timestamp, signature, body}   | Webhook HTTP POST (Ed25519 signature)
 | POST `/` {"message": "PING"}            | Webhook HTTP POST Ping
 

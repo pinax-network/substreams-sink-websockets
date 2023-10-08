@@ -56,9 +56,10 @@ export default async function (req: Request, server: Server) {
     prometheus.trace_id.labels({traceId}).inc(1);
 
     // Upsert moduleHash into SQLite DB
-    sqlite.replace(db, "moduleHash", moduleHash, timestamp);
     sqlite.replace(db, "chain", chain, timestamp);
-    sqlite.replace(db, "traceId", traceId, timestamp);
+    sqlite.replace(db, "moduleHash", moduleHash, timestamp);
+    sqlite.replace(db, "moduleHashByChain", `${chain}:${moduleHash}`, timestamp);
+    sqlite.replace(db, "traceId", `${chain}:${traceId}`, timestamp);
 
     return new Response("OK");
 }

@@ -14,6 +14,7 @@ export function createDb(filename: string) {
 
     // create tables if does not exists
     create(db, "moduleHash");
+    create(db, "moduleHashByChain");
     create(db, "traceId");
     create(db, "chain");
     return db;

@@ -8,8 +8,16 @@ export default function (ws: ServerWebSocket<ServerWebSocketData>, params: {[key
     const { moduleHash, chain } = params;
     const topic = chain ? `${chain}:${moduleHash}` : moduleHash;
     if ( ws.isSubscribed(topic) ) throw new Error(`Already subscribed to [${topic}] topic.`);
-    if ( !sqlite.exists(db, "moduleHash", moduleHash) ) throw new Error(`ModuleHash [${moduleHash}] not found.`);
-    if ( chain && !sqlite.exists(db, "chain", chain) ) throw new Error(`Chain [${chain}] not found.`);
+
+    // Subscribe to ModuleHash by Chain
+    if ( chain ) {
+        if ( !sqlite.exists(db, "chain", chain) ) throw new Error(`Chain [${chain}] not found.`);
+        if ( !sqlite.exists(db, "moduleHashByChain", topic) ) throw new Error(`ModuleHash [${moduleHash}] from Chain [${chain}] not found.`);
+
+    // Subscribe to all ModuleHash
+    } else {
+        if ( !sqlite.exists(db, "moduleHash", moduleHash) ) throw new Error(`ModuleHash [${moduleHash}] not found.`);
+    }
     ws.subscribe(topic);
     logger.info('subscribed', {id, key: ws.data.key, remoteAddress: ws.remoteAddress, topic, params});
 }
