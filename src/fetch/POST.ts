@@ -48,12 +48,12 @@ export default async function (req: Request, server: Server) {
     // -1 if backpressure was applied
     // or the number of bytes sent.
     if ( bytes > 0 ) {
-        prometheus.bytes_published.inc(bytes);
+        prometheus.published_messages_bytes.inc(bytes);
         prometheus.published_messages.inc(1);
     }
     // Metrics for incoming WebHook
     prometheus.webhook_messages.labels({moduleHash, chain}).inc(1);
-    prometheus.trace_id.labels({traceId}).inc(1);
+    prometheus.webhook_trace_id.labels({traceId, chain}).inc(1);
 
     // Upsert moduleHash into SQLite DB
     sqlite.replace(db, "chain", chain, timestamp);
