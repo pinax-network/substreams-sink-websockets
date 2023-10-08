@@ -21,13 +21,16 @@ export function banner()  {
         /metrics
         /moduleHash
         /traceId
+        /chain
 
     HTTP POST (Ed25519 signature)
         / {timestamp, signature, body}
         / {"message":"PING"}
 
     WebSocket
-        message <moduleHash>
+        Message {"method": "ping"}
+        Message {"method": "time"}
+        Message {"method": "subscribe", "params": {moduleHash, chain}}
 `
     return text;
 }

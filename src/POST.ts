@@ -32,12 +32,15 @@ export default async function (req: Request, server: Server) {
     }
     // Get data from Substreams metadata
     const { clock, manifest, session } = json;
-    const { moduleHash } = manifest;
+    const { moduleHash, chain } = manifest;
     const { traceId } = session;
 
     // publish message to subscribers
     const bytes = server.publish(moduleHash, body);
     logger.info('server.publish', {bytes, block: clock.number, timestamp: clock.timestamp, moduleHash});
+
+    // additional publish message specified by chain
+    server.publish(`${chain}:${moduleHash}`, body)
 
     // Metrics for published messages
     // response is:
@@ -49,11 +52,12 @@ export default async function (req: Request, server: Server) {
         prometheus.published_messages.inc(1);
     }
     // Metrics for incoming WebHook
-    prometheus.webhook_messages.labels({moduleHash}).inc(1);
+    prometheus.webhook_messages.labels({moduleHash, chain}).inc(1);
     prometheus.trace_id.labels({traceId}).inc(1);
 
     // Upsert moduleHash into SQLite DB
     sqlite.replace(db, "moduleHash", moduleHash, timestamp);
+    sqlite.replace(db, "chain", chain, timestamp);
     sqlite.replace(db, "traceId", traceId, timestamp);
 
     return new Response("OK");

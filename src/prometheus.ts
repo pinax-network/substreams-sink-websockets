@@ -29,7 +29,7 @@ export async function getSingleMetric(name: string) {
 }
 
 // Webhook metrics
-export const webhook_messages = registerCounter('webhook_messages', 'Total Webhook messages received', ['moduleHash']);
+export const webhook_messages = registerCounter('webhook_messages', 'Total Webhook messages received', ['moduleHash', 'chain']);
 export const trace_id = registerGauge('trace_id', 'Total trace ids', ['traceId']);
 
 // WebSocket metrics

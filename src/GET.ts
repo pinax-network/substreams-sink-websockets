@@ -23,5 +23,6 @@ export default async function (req: Request, server: Server) {
     if ( pathname === "/metrics") return new Response(await prometheus.registry.metrics());
     if ( pathname === "/moduleHash") return toJSON(sqlite.selectAll(db, "moduleHash"));
     if ( pathname === "/traceId") return toJSON(sqlite.selectAll(db, "traceId"));
+    if ( pathname === "/chain") return toJSON(sqlite.selectAll(db, "chain"));
     return new Response("Not found", { status: 400 });
 }
