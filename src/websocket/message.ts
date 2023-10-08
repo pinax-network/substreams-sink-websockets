@@ -11,7 +11,7 @@ export default function (ws: ServerWebSocket<ServerWebSocketData>, message: stri
     try {
         // handle websocket methods from user message
         const { method, params, id } = parseMessage(message);
-        prometheus.received_message.labels({ method }).inc(1);
+        prometheus.message_received.labels({ method }).inc(1);
         if ( method === "ping" ) return ping(ws, id);
         if ( method === "time" ) return time(ws, id);
         if ( method === "subscribe" ) return subscribe(ws, params, id);
@@ -20,6 +20,6 @@ export default function (ws: ServerWebSocket<ServerWebSocketData>, message: stri
         logger.error(e);
         ws.send(JSON.stringify({ status: 400, error: { message: e.message } }));
         ws.close();
-        prometheus.received_message_errors.labels().inc(1);
+        prometheus.message_received_errors.labels().inc(1);
     }
 }

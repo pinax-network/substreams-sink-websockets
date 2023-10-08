@@ -9,7 +9,7 @@ export function registerCounter(name: string, help = "help", labelNames: string[
         registry.registerMetric(new Counter({ name, help, labelNames, ...config }));
         return registry.getSingleMetric(name) as Counter;
     } catch (e) {
-        logger.error(e);
+        logger.error({name, e});
     }
 }
 
@@ -18,7 +18,7 @@ export function registerGauge(name: string, help = "help", labelNames: string[] 
         registry.registerMetric(new Gauge({ name, help, labelNames, ...config }));
         return registry.getSingleMetric(name) as Gauge;
     } catch (e) {
-        logger.error(e);
+        logger.error({name, e});
     }
 }
 
@@ -29,14 +29,17 @@ export async function getSingleMetric(name: string) {
 }
 
 // Webhook metrics
-export const webhook_messages = registerCounter('webhook_messages', 'Total Webhook messages received', ['moduleHash', 'chain']);
 export const webhook_trace_id = registerCounter('trace_id', 'Total Webhook Substreams trace ids', ['traceId', 'chain']);
+export const webhook_message_received = registerCounter('webhook_message_received', 'Total Webhook messages received', ['moduleHash', 'chain']);
+export const webhook_message_received_errors = registerCounter('webhook_message_received_errors', 'Total Webhook errors from messages received');
 
 // WebSocket metrics
-export const active_connections = registerGauge('active_connections', 'All WebSocket active connections');
-export const connected = registerCounter('connected', 'Total WebSocket connected clients');
-export const disconnects = registerCounter('disconnects', 'Total WebSocket disconnects');
-export const published_messages = registerCounter('published_messages', 'Total WebSocket published messages');
-export const published_messages_bytes = registerCounter('published_messages_bytes', 'Total WebSocket  published messages in bytes');
-export const received_message = registerCounter('received_messages', 'Total WebSocket messages received', ['method']);
-export const received_message_errors = registerCounter('received_messages_errors', 'Total WebSocket errors from messages received');
+export const connection_active = registerGauge('connection_active', 'Total WebSocket active connections');
+export const connection_open = registerCounter('connection_open', 'Total WebSocket open connections');
+export const connection_close = registerCounter('connection_close', 'Total WebSocket close connections');
+
+export const publish_message = registerCounter('publish_message', 'Total WebSocket published messages');
+export const publish_message_bytes = registerCounter('publish_message_bytes', 'Total WebSocket  published messages in bytes');
+
+export const message_received = registerCounter('message_received', 'Total WebSocket messages received', ['method']);
+export const message_received_errors = registerCounter('message_received_errors', 'Total WebSocket errors from messages received');

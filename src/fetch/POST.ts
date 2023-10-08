@@ -14,14 +14,23 @@ export default async function (req: Request, server: Server) {
     logger.info('POST', {timestamp, signature, body});
 
     // validate request
-    if (!timestamp) return new Response("missing required timestamp in headers", { status: 400 });
-    if (!signature) return new Response("missing required signature in headers", { status: 400 });
-    if (!body) return new Response("missing body", { status: 400 });
+    try {
+        if (!timestamp) throw new Error("missing required \'timestamp\' in headers");
+        if (!signature) throw new Error("missing required \'signature\' in headers");
+        if (!body) throw new Error("missing body");
+    } catch (e) {
+        logger.error(e);
+        prometheus.webhook_message_received_errors.inc(1);
+        return new Response(e.message, { status: 400 });
+    }
 
     // verify request
     const msg = Buffer.from(timestamp + body);
     const isVerified = verify(msg, signature, PUBLIC_KEY);
-    if (!isVerified) return new Response("invalid request signature", { status: 401 });
+    if (!isVerified) {
+        prometheus.webhook_message_received_errors.inc(1);
+        return new Response("invalid request signature", { status: 401 });
+    }
     const json = JSON.parse(body);
 
     // Webhook handshake (not WebSocket related)
@@ -32,8 +41,22 @@ export default async function (req: Request, server: Server) {
     }
     // Get data from Substreams metadata
     const { clock, manifest, session } = json;
-    const { moduleHash, chain } = manifest;
-    const { traceId } = session;
+    const { moduleHash, chain } = manifest ?? {};
+    const { traceId } = session ?? {};
+
+    // validate POST request
+    try {
+        if (!clock) throw new Error("missing required \'clock\' in body");
+        if (!manifest) throw new Error("missing required \'manifest\' in body");
+        if (!session) throw new Error("missing required \'session\' in body");
+        if (!chain) throw new Error("missing required \'chain\' in body.manifest");
+        if (!moduleHash) throw new Error("missing required \'moduleHash\' in body.manifest");
+        if (!traceId) throw new Error("missing required \'traceId\' in body.session");
+    } catch (e) {
+        logger.error(e);
+        prometheus.webhook_message_received_errors.inc(1);
+        return new Response(e.message, { status: 400 });
+    }
 
     // publish message to subscribers
     const bytes = server.publish(moduleHash, body);
@@ -48,11 +71,11 @@ export default async function (req: Request, server: Server) {
     // -1 if backpressure was applied
     // or the number of bytes sent.
     if ( bytes > 0 ) {
-        prometheus.published_messages_bytes.inc(bytes);
-        prometheus.published_messages.inc(1);
+        prometheus.publish_message_bytes.inc(bytes);
+        prometheus.publish_message.inc(1);
     }
     // Metrics for incoming WebHook
-    prometheus.webhook_messages.labels({moduleHash, chain}).inc(1);
+    prometheus.webhook_message_received.labels({moduleHash, chain}).inc(1);
     prometheus.webhook_trace_id.labels({traceId, chain}).inc(1);
 
     // Upsert moduleHash into SQLite DB
