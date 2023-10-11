@@ -2,7 +2,6 @@ import "dotenv/config";
 
 import pkg from "../package.json" assert { type: "json" };
 import { Command, Option } from "commander";
-import { logger } from "./logger.js";
 
 // default values
 export const DEFAULT_PORT = 3000
