@@ -16,6 +16,8 @@ logger.info("Reading SQLITE_FILENAME", SQLITE_FILENAME);
 
 export interface ServerWebSocketData {
   key: string;
+  moduleHash?: string;
+  chain?: string;
 }
 
 Bun.serve<ServerWebSocketData>({
