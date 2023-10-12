@@ -23,6 +23,13 @@ Send Text Message with the following JSON payloads
     }
 }
 ```
+### `ping` Request
+
+```json
+{
+    "method": "ping"
+}
+```
 
 ## REST API
 
@@ -117,3 +124,9 @@ docker run -it --rm --env-file .env ghcr.io/pinax-network/substreams-sink-websoc
 
 - [**Substreams** documentation](https://substreams.streamingfast.io/)
 - [Bun WebSockets](https://bun.sh/docs/api/websockets)
+
+  Bun's latest v1.0 release includes WebSocket support (written in Zig)
+  https://bun.sh/docs/api/websockets
+
+  Under the hood, it uses uWebSockets
+  https://github.com/uNetworking/uWebSockets
