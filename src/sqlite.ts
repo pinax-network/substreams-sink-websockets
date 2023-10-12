@@ -17,12 +17,18 @@ export function createDb(filename: string) {
     create(db, "moduleHashByChain");
     create(db, "traceId");
     create(db, "chain");
+    createInc(db, "connection");
     return db;
 }
 
 export function create(db: Database, table: string) {
     if ( !table ) throw new Error("table is required");
     return db.run(`CREATE TABLE IF NOT EXISTS ${table} (key TEXT PRIMARY KEY, value TEXT)`);
+}
+
+export function createInc(db: Database, table: string) {
+    if ( !table ) throw new Error("table is required");
+    return db.run(`CREATE TABLE IF NOT EXISTS ${table} (key TEXT PRIMARY KEY, value TEXT, timestamp INTEGER)`);
 }
 
 export function replace(db: Database, table: string, key: string, value: string|number) {
@@ -45,6 +51,14 @@ export function select(db: Database, table: string, key: string) {
 export function exists(db: Database, table: string, key: string ) {
     return select(db, table, key).length > 0;
 }
+
+export function increment(db: Database, table: string, key: string, value: number, timestamp: number) {
+    if ( exists(db, table, key) ) {
+        return db.prepare(`UPDATE ${table} SET value = value + ?, timestamp = ? WHERE key = ?`).run(value, timestamp, key);
+    }
+    return db.prepare(`REPLACE INTO ${table} (key, value, timestamp) VALUES (?, ?, ?)`).run(key, value, timestamp);
+}
+
 
 // TO-DO: UPDATE (increment/decrement)
 // UPDATE product SET price = price + 50 WHERE id = 1

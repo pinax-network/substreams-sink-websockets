@@ -6,6 +6,7 @@ import { db } from "../../index.js";
 import { toJSON } from "../http.js";
 import { Server } from "bun";
 import { logger } from "../logger.js";
+import { websocketClient } from "../websocket/websocketClient.js"
 
 export default async function (req: Request, server: Server) {
     // Bun automatically returns a 101 Switching Protocols
@@ -17,7 +18,7 @@ export default async function (req: Request, server: Server) {
       return;
     }
 
-    const { pathname } = new URL(req.url);
+    const { pathname, searchParams} = new URL(req.url);
     if ( pathname === "/") return new Response(banner())
     if ( pathname === "/health") return checkHealth();
     if ( pathname === "/metrics") return new Response(await prometheus.registry.metrics());
@@ -25,5 +26,6 @@ export default async function (req: Request, server: Server) {
     if ( pathname === "/moduleHashByChain") return toJSON(sqlite.selectAll(db, "moduleHashByChain"));
     if ( pathname === "/traceId") return toJSON(sqlite.selectAll(db, "traceId"));
     if ( pathname === "/chain") return toJSON(sqlite.selectAll(db, "chain"));
+    if ( pathname === "/subscribe") return new Response(await websocketClient(req.url, searchParams));
     return new Response("Not found", { status: 400 });
 }
