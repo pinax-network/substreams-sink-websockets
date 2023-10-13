@@ -14,7 +14,7 @@ function checkLimit(limitData: any, ws: ServerWebSocket<ServerWebSocketData>) {
     // If timestamp is less than 5 minutes ago, increment counter assuming rate limit has not been reached
     if (Number(limitData[0].timestamp) > Date.now() - 300000) {
         // rate limit
-        if (Number(limitData[0]?.value) >= 3) {
+        if (Number(limitData[0]?.value) >= 300) {
             throw new Error("Too many connections from this IP address");
         }
 
