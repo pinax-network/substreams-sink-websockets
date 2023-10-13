@@ -2,7 +2,9 @@ import Database from "bun:sqlite";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-export type KV = {key: string, value: string|number};
+export type KV = {
+    timestamp: number,key: string, value: string|number
+};
 
 export function createDb(filename: string) {
     // create folder if does not exists
@@ -35,6 +37,10 @@ export function replace(db: Database, table: string, key: string, value: string|
     return db.prepare(`REPLACE INTO ${table} (key, value) VALUES (?, ?)`).run(key, value);
 }
 
+export function replaceInc(db: Database, table: string, key: string, value: string|number, timestamp: number) {
+    return db.prepare(`REPLACE INTO ${table} (key, value, timestamp) VALUES (?, ?, ?)`).run(key, value, timestamp);
+}
+
 export function selectAll(db: Database, table: string) {
     return db.query(`SELECT * FROM ${table}`).all() as KV[];
 }
@@ -58,6 +64,7 @@ export function increment(db: Database, table: string, key: string, value: numbe
     }
     return db.prepare(`REPLACE INTO ${table} (key, value, timestamp) VALUES (?, ?, ?)`).run(key, value, timestamp);
 }
+
 
 
 // TO-DO: UPDATE (increment/decrement)
