@@ -1,4 +1,4 @@
-name: Bun executable
+name: Generate standalone Bun executable
 on:
   release:
     types: [ published ]
@@ -7,7 +7,7 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build-and-push-release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
