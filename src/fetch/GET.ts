@@ -3,9 +3,12 @@ import { checkHealth } from "../health.js";
 import * as prometheus from "../prometheus.js";
 import * as sqlite from "../sqlite.js";
 import { db } from "../../index.js";
-import { toJSON } from "../http.js";
 import { Server } from "bun";
 import { logger } from "../logger.js";
+import openapi from "./openapi.js";
+import swaggerHtml  from "../../swagger/index.html"
+import swaggerFavicon from "../../swagger/favicon.png"
+import { NotFound, toFile, toJSON, toText } from "./cors.js";
 
 export default async function (req: Request, server: Server) {
     const { pathname, searchParams} = new URL(req.url);
@@ -21,7 +24,9 @@ export default async function (req: Request, server: Server) {
         return;
     }
 
-    if ( pathname === "/") return new Response(banner())
+    //if ( pathname === "/") return new Response(banner())
+    if ( pathname === "/" ) return toFile(Bun.file(swaggerHtml));
+    if ( pathname === "/favicon.png" ) return toFile(Bun.file(swaggerFavicon));
     if ( pathname === "/health") return checkHealth();
     if ( pathname === "/metrics") return new Response(await prometheus.registry.metrics());
     if ( pathname === "/moduleHash") return toJSON(sqlite.selectAll(db, "moduleHash"));
