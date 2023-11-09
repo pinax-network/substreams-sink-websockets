@@ -8,13 +8,6 @@ const TAGS = {
   HEALTH: "Health",
   USAGE: "Usage",
   DOCS: "Documentation",
-  FAVICON: "Favicon",
-  METRICS: "Metrics",
-  MODULEHASH: "ModuleHash",
-  MODULEHASHBYCHAIN: "ModuleHashByChain",
-  TRACEID: "TraceId",
-  CHAIN: "Chain",
-  OPENAPI: "OpenAPI",
 
 } as const;
 
@@ -27,16 +20,9 @@ export default new OpenApiBuilder()
   .addExternalDocs({ url: pkg.homepage, description: "Extra documentation" })
   .addSecurityScheme("auth-key", { type: "http", scheme: "bearer" })
 
-  .addPath("/favicon.png", {
-    get: {
-      tags: [TAGS.FAVICON],
-      summary: "Endpoint for favicon.png",
-      responses: {200: { description: "OK", content: { "image/png": {schema: { type: "string", format: "binary" } } } }},
-    },
-  })
   .addPath("/health", {
     get: {
-      tags: [TAGS.HEALTH],
+      tags: [TAGS.MONITORING],
       summary: "Performs health checks and checks if the database is accessible",
       responses: {200: { description: "OK", content: { "text/plain": {example: "OK"}} } },
     },
@@ -50,35 +36,35 @@ export default new OpenApiBuilder()
   })
   .addPath("/moduleHash", {
     get: {
-      tags: [TAGS.MODULEHASH],
+      tags: [TAGS.USAGE],
       summary: "Returns module hash",
       responses: {200: { description: "OK", content: { "text/plain": {example: "OK"}} } },
     },
   })
   .addPath("/moduleHashByChain", {
     get: {
-      tags: [TAGS.MODULEHASHBYCHAIN],
+      tags: [TAGS.USAGE],
       summary: "Returns module hash by chain",
       responses: {200: { description: "OK", content: { "text/plain": {example: "OK"}} } },
     },
   })
   .addPath("/traceId", {
     get: {
-      tags: [TAGS.TRACEID],
+      tags: [TAGS.USAGE],
       summary: "Returns traceId",
       responses: {200: { description: "OK", content: { "text/plain": {example: "OK"}} } },
     },
   })
   .addPath("/chain", {
     get: {
-      tags: [TAGS.CHAIN],
+      tags: [TAGS.USAGE],
       summary: "Provides list of available chains",
       responses: {200: { description: "OK", content: { "text/plain": {example: "OK"}} } },
     },
   })
   .addPath("/openapi", {
     get: {
-      tags: [TAGS.OPENAPI],
+      tags: [TAGS.DOCS],
       summary: "OpenAPI specification",
       responses: {200: {description: "OpenAPI JSON Specification", content: { "application/json": { schema: { type: "string" } } } }},
     },
