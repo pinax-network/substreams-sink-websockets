@@ -7,7 +7,7 @@ import { logger } from "../logger.js";
 import openapi from "./openapi.js";
 import swaggerHtml  from "../../swagger/index.html"
 import swaggerFavicon from "../../swagger/favicon.png"
-import { toFile, toJSON } from "./cors.js";
+import { toFile, toJSON, toText } from "./cors.js";
 
 export default async function (req: Request, server: Server) {
     const { pathname, searchParams} = new URL(req.url);
@@ -26,11 +26,11 @@ export default async function (req: Request, server: Server) {
     if ( pathname === "/" ) return toFile(Bun.file(swaggerHtml));
     if ( pathname === "/favicon.png" ) return toFile(Bun.file(swaggerFavicon));
     if ( pathname === "/health") return checkHealth();
-    if ( pathname === "/metrics") return new Response(await prometheus.registry.metrics());
+    if ( pathname === "/metrics") return toText(await prometheus.registry.metrics());
     if ( pathname === "/moduleHash") return toJSON(sqlite.selectAll(db, "moduleHash"));
     if ( pathname === "/moduleHashByChain") return toJSON(sqlite.selectAll(db, "moduleHashByChain"));
     if ( pathname === "/traceId") return toJSON(sqlite.selectAll(db, "traceId"));
     if ( pathname === "/chain") return toJSON(sqlite.selectAll(db, "chain"));
     if ( pathname === "/openapi") return toJSON(openapi);
-    return new Response("Not found", { status: 400 });
+    return toText("Not found", 400 );
 }

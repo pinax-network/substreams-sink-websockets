@@ -5,6 +5,7 @@ import { logger } from "../logger.js";
 import { verify } from "../verify.js";
 import { PUBLIC_KEY } from "../config.js";
 import { Server } from "bun";
+import { toText } from "./cors.js";
 
 export default async function (req: Request, server: Server) {
     // get headers and body from POST request
@@ -21,7 +22,7 @@ export default async function (req: Request, server: Server) {
     } catch (e) {
         logger.error(e);
         prometheus.webhook_message_received_errors.inc(1);
-        return new Response(e.message, { status: 400 });
+        return toText(e.message, 400 );
     }
 
     // verify request
@@ -29,7 +30,7 @@ export default async function (req: Request, server: Server) {
     const isVerified = verify(msg, signature, PUBLIC_KEY);
     if (!isVerified) {
         prometheus.webhook_message_received_errors.inc(1);
-        return new Response("invalid request signature", { status: 401 });
+        return toText("invalid request signature", 401 );
     }
     const json = JSON.parse(body);
 
@@ -37,7 +38,7 @@ export default async function (req: Request, server: Server) {
     if (json?.message == "PING") {
         const message = JSON.parse(body).message;
         logger.info('PING WebHook handshake', {message});
-        return new Response("OK");
+        return toText("OK");
     }
     // Get data from Substreams metadata
     const { clock, manifest, session } = json;
@@ -55,7 +56,7 @@ export default async function (req: Request, server: Server) {
     } catch (e) {
         logger.error(e);
         prometheus.webhook_message_received_errors.inc(1);
-        return new Response(e.message, { status: 400 });
+        return toText(e.message, 400 );
     }
 
     // publish message to subscribers
@@ -84,5 +85,5 @@ export default async function (req: Request, server: Server) {
     sqlite.replace(db, "moduleHashByChain", `${chain}:${moduleHash}`, timestamp);
     sqlite.replace(db, "traceId", `${chain}:${traceId}`, timestamp);
 
-    return new Response("OK");
+    return toText("OK");
 }
