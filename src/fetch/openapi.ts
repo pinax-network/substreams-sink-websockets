@@ -18,22 +18,8 @@ export default new OpenApiBuilder()
     description: pkg.description,
   })
   .addExternalDocs({ url: pkg.homepage, description: "Extra documentation" })
-  .addSecurityScheme("auth-key", { type: "http", scheme: "bearer" })
+  //.addSecurityScheme("auth-key", { type: "http", scheme: "bearer" })
 
-  .addPath("/health", {
-    get: {
-      tags: [TAGS.MONITORING],
-      summary: "Performs health checks and checks if the database is accessible",
-      responses: {200: { description: "OK", content: { "text/plain": {example: "OK"}} } },
-    },
-  })
-  .addPath("/metrics", {
-    get: {
-      tags: [TAGS.MONITORING],
-      summary: "Prometheus metrics",
-      responses: {200: { description: "Prometheus metrics", content: { "text/plain": { example: await registry.metrics(), schema: { type: "string" } } }}},
-    },
-  })
   .addPath("/moduleHash", {
     get: {
       tags: [TAGS.USAGE],
@@ -60,6 +46,20 @@ export default new OpenApiBuilder()
       tags: [TAGS.USAGE],
       summary: "Provides list of available chains",
       responses: {200: { description: "OK", content: { "text/plain": {example: "OK"}} } },
+    },
+  })
+  .addPath("/health", {
+    get: {
+      tags: [TAGS.MONITORING],
+      summary: "Performs health checks and checks if the database is accessible",
+      responses: {200: { description: "OK", content: { "text/plain": {example: "OK"}} } },
+    },
+  })
+  .addPath("/metrics", {
+    get: {
+      tags: [TAGS.MONITORING],
+      summary: "Prometheus metrics",
+      responses: {200: { description: "Prometheus metrics", content: { "text/plain": { example: await registry.metrics(), schema: { type: "string" } } }}},
     },
   })
   .addPath("/openapi", {
