@@ -6,7 +6,13 @@ import * as sqlite from "../sqlite.js";
 import * as prometheus from "../prometheus.js";
 
 export default function (ws: ServerWebSocket<ServerWebSocketData>, params: {[key: string]: any}, id?: string) {
-    const { moduleHash, chain } = params;
+    const { chain, block } = params;
+    let { moduleHash } = params;
+
+    if ( block === true ) {
+        moduleHash = sqlite.selectAll(db, "moduleHash")[0].key;
+    }
+
     const topic = chain ? `${chain}:${moduleHash}` : moduleHash;
     if ( ws.isSubscribed(topic) ) throw new Error(`Already subscribed to [${topic}] topic.`);
 

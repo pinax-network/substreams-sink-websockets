@@ -11,8 +11,6 @@ export function parseMessage(message: string|Buffer): { method: string, id: stri
 
     if ( method === 'subscribe' ) {
         if ( params === null || params === undefined) throw new Error('Missing required \'params\' in JSON request.');
-        const { moduleHash } = params;
-        if ( moduleHash === null || moduleHash === undefined) throw new Error('Missing required \'moduleHash\' in JSON request.');
     }
 
     return json;
