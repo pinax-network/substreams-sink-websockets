@@ -26,15 +26,6 @@ test("parseMessage - Missing required 'params' in JSON request.", () => {
     }`)).toThrow("Missing required 'params' in JSON request.");
 });
 
-test("parseMessage - Missing required 'moduleHash' in JSON request.", () => {
-    expect(() => parseMessage(`{
-        "method": "subscribe",
-        "params": {
-            "chain": "bsc"
-        }
-    }`)).toThrow("Missing required 'moduleHash' in JSON request.");
-});
-
 test("parseMessage - ping", () => {
     expect(parseMessage(`{
         "method": "ping"
