@@ -6,7 +6,7 @@ import { verify } from "../verify.js";
 import { PUBLIC_KEY } from "../config.js";
 import { Server } from "bun";
 import { toText } from "./cors.js";
-import { recentMessages } from "../recentMessages.js";
+import { insertMessages } from "./messages.js";
 
 export default async function (req: Request, server: Server) {
     // get headers and body from POST request
@@ -87,7 +87,7 @@ export default async function (req: Request, server: Server) {
     sqlite.replace(db, "traceId", `${chain}:${traceId}`, timestamp);
     //Set timestamp as key to filter recent messages
 
-    recentMessages( db, traceId, JSON.stringify(json), chain );
+    insertMessages( db, traceId, JSON.stringify(json), chain );
 
     return toText("OK");
 }
