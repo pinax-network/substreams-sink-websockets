@@ -8,6 +8,7 @@ export const DEFAULT_PORT = 3000
 export const DEFAULT_HOSTNAME = "0.0.0.0"
 export const DEFAULT_VERBOSE = false
 export const DEFAULT_SQLITE_FILENAME = "db.sqlite"
+export const DEFAULT_RECENT_MESSAGES_LIMIT = 50
 
 // parse command line options
 const opts = new Command()
@@ -19,6 +20,7 @@ const opts = new Command()
     .addOption(new Option("--hostname <string>", "Server listen on HTTP hostname").default(DEFAULT_HOSTNAME).env("HOSTNAME"))
     .addOption(new Option("--sqlite-filename <string>", "SQLite database filename").default(DEFAULT_SQLITE_FILENAME).env("SQLITE_FILENAME"))
     .addOption(new Option("--verbose <boolean>", "Enable verbose logging").default(DEFAULT_VERBOSE).env("VERBOSE"))
+    .addOption(new Option("--recent-messages-limit <int>", "Limit recent messages").default(DEFAULT_RECENT_MESSAGES_LIMIT).env("RECENT_MESSAGES_LIMIT"))
     .version(pkg.version)
     .parse(process.argv).opts();
 
@@ -28,6 +30,7 @@ export const PORT = Number(opts.port);
 export const HOSTNAME: string = opts.hostname
 export const SQLITE_FILENAME: string = opts.sqliteFilename;
 export const VERBOSE: boolean = opts.verbose === "true" ? true : false;
+export const RECENT_MESSAGES_LIMIT: number = Number(opts.recentMessagesLimit);
 
 // validate required options
 if (!PUBLIC_KEY) throw new Error("PUBLIC_KEY is required");
