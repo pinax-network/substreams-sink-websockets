@@ -7,7 +7,6 @@ export function recentMessages(db: any, traceId: string, timestamp: string, chai
 
     if (dbLength >= RECENT_MESSAGES_LIMIT) {
         let oldest = sqlite.selectAll(db, "recentMessages").sort((a: any, b: any) => a.timestamp - b.timestamp)[0];
-        console.log("oldest", oldest)
 
         //update recentMessages
         sqlite.replaceRecent(db, "recentMessages", String(Date.now()), `${traceId}`, timestamp);
@@ -16,7 +15,6 @@ export function recentMessages(db: any, traceId: string, timestamp: string, chai
         //update recentMessagesByChain
         if (chain) {
             oldest = sqlite.selectAll(db, "recentMessagesByChain").sort((a: any, b: any) => a.timestamp - b.timestamp)[0];
-            console.log(oldest)
             sqlite.replaceRecent(db, "recentMessagesByChain", String(Date.now()), `${chain}:${traceId}`, timestamp );
             sqlite.deleteRow(db, "recentMessagesByChain", `${oldest.key}`);
         }
