@@ -52,7 +52,6 @@ export function replaceRecent(db: Database, table: string, key: string, value: s
     return db.prepare(`REPLACE INTO ${table} (key, value, payload) VALUES (?, ?, ?)`).run(key, value, payload);
 }
 
-
 export function selectAll(db: Database, table: string) {
     return db.query(`SELECT * FROM ${table}`).all() as KV[];
 }
