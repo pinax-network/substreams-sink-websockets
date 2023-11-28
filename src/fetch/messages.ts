@@ -2,7 +2,7 @@ import * as sqlite from "../sqlite.js";
 import { DEFAULT_RECENT_MESSAGES_LIMIT, RECENT_MESSAGES_LIMIT } from "../config.js";
 import Database from "bun:sqlite";
 import { db } from "../../index.js";
-import { toJSON } from "./cors.js";
+import { toJSON, toText } from "./cors.js";
 
 export function parseLimit(searchParams: URLSearchParams) {
     const value = searchParams.get("limit");
@@ -30,8 +30,8 @@ export function handleMessages(req: Request) {
     // // error handling
     // if (distinct !== "true" && distinct !== null) return toText("distinct must be set to true if declared", 400 );
     // if (distinct === "true" && chain) return toText("chain cannot be set if distinct is set to true", 400 );
-
-    selectMessages(db, limit, sort, chain, moduleHash);
+    return toJSON(selectMessages(db, limit, sort, chain, moduleHash));
+    //console.log(messages)
 }
 
 export function insertMessages(db: Database, traceId: string, timestamp: string, chain?: string) {
@@ -65,8 +65,7 @@ export function selectMessages(db: Database, limit: number, sortBy: string, chai
     // if (distinct) messages = selectDistinct(distinct, messages, db, chain, sortBy, limit);
     if (chain) messages = sqlite.selectAllRecent(db, "messagesByChain", "*", sortBy, limit).filter((message: any) => message.value.includes(chain));
     if (moduleHash) messages = messages.filter((message: any) => message.value.includes(moduleHash));
-
-    return toJSON(messages);
+    return messages
 }
 
 // export function selectDistinct(distinct?: string, messages?: any, db?: any, chain?: string, sortBy?: string, limit?: number) {

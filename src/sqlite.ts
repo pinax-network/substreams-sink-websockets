@@ -20,8 +20,8 @@ export function createDb(filename: string) {
     create(db, "traceId");
     create(db, "chain");
     createTime(db, "connection");
-    createRecent(db, "recentMessages")
-    createRecent(db, "recentMessagesByChain")
+    createRecent(db, "messages")
+    createRecent(db, "messagesByChain")
     return db;
 }
 

@@ -48,6 +48,20 @@ export default new OpenApiBuilder()
       responses: {200: { description: "OK", content: { "text/plain": {example: "OK"}} } },
     },
   })
+  .addPath("/messages", {
+    get: {
+      tags: [TAGS.USAGE],
+      parameters: [
+        {name: "chain", in: "query", schema: {type: "string"}, required: false},
+        {name: "moduleHash", in: "query", schema: {type: "string"}, required: false},
+        {name: "limit", in: "query", schema: {type: "integer"}, required: false},
+        {name: "sort", in: "query", schema: {type: "string"}, required: false},
+        {name: "distinct", in: "query", schema: {type: "boolean"}, required: false},
+      ],
+      summary: "Provides list of recent messages",
+      responses: {200: {description: "OpenAPI JSON Specification", content: { "application/json": { schema: { type: "string" } } } }},
+    },
+  })
   .addPath("/health", {
     get: {
       tags: [TAGS.MONITORING],

@@ -41,9 +41,25 @@ Send Text Message with the following JSON payloads
 | GET `/traceId`            | Returns all `traceId` by `chain`
 | GET `/moduleHash`         | Returns all available `moduleHash`
 | GET `/moduleHashByChain`  | Returns all available `moduleHash` by `chain`
+| GET `/openapi`            | Returns api documentation in JSON format
+| GET `/messages`           | Returns the most recent messages
 | POST `/` {timestamp, signature, body}   | Webhook HTTP POST (Ed25519 signature)
 | POST `/` {"message": "PING"}            | Webhook HTTP POST Ping
 
+## Parameters
+### /messages
+| Parameter       | Type   | Description                              |
+|-----------------|--------|------------------------------------------|
+| `chain`         | string | Filter results by chain name, cannot be used with distinct
+| `moduleHash`    | string | Filter results by module hash
+| `limit`         | int    | Limit number of results shown with a maximum value of 50
+| `sort`          | string | Sort by asc (ascending) or desc (descending)
+| `distinct`      | bool   | If set to true, will return list of results distinct by chain.
+
+### Example Request
+```
+/messages?chain=value1&moduleHash=value2&limit=value3&sort=value4
+```
 ## WebSockets examples
 
 - [`Bun`](/examples/bun) - https://bun.sh/
