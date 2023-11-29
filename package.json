@@ -12,15 +12,13 @@
     "dev": "bun run --watch index.ts"
   },
   "dependencies": {
-    "@substreams/sink-entity-changes": "^0.3.4",
     "commander": "latest",
     "dotenv": "latest",
     "openapi3-ts": "latest",
     "prom-client": "latest",
     "substreams-sink-webhook": "^0.7.2",
     "tslog": "latest",
-    "tweetnacl": "latest",
-    "zod": "^3.22.4"
+    "tweetnacl": "latest"
   },
   "devDependencies": {
     "bun-types": "latest",
