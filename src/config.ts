@@ -15,7 +15,7 @@ const opts = new Command()
     .name(pkg.name)
     .description(pkg.description)
     .showHelpAfterError()
-    .addOption(new Option("--public-key <string>", "(required) Ed25519 public key").env("PUBLIC_KEY"))
+    .addOption(new Option("--public-key <string>", "(required) Ed25519 public key (comma-separated for multiple public keys)").env("PUBLIC_KEY"))
     .addOption(new Option("--port <int>", "Server listen on HTTP port").default(DEFAULT_PORT).env("PORT"))
     .addOption(new Option("--hostname <string>", "Server listen on HTTP hostname").default(DEFAULT_HOSTNAME).env("HOSTNAME"))
     .addOption(new Option("--sqlite-filename <string>", "SQLite database filename").default(DEFAULT_SQLITE_FILENAME).env("SQLITE_FILENAME"))
@@ -25,7 +25,7 @@ const opts = new Command()
     .parse(process.argv).opts();
 
 // export options
-export const PUBLIC_KEY: string = opts.publicKey;
+export const PUBLIC_KEYS: string[] = opts.publicKey?.split(",");
 export const PORT = Number(opts.port);
 export const HOSTNAME: string = opts.hostname
 export const SQLITE_FILENAME: string = opts.sqliteFilename;
@@ -33,6 +33,8 @@ export const VERBOSE: boolean = opts.verbose === "true" ? true : false;
 export const RECENT_MESSAGES_LIMIT: number = Number(opts.recentMessagesLimit);
 
 // validate required options
-if (!PUBLIC_KEY) throw new Error("PUBLIC_KEY is required");
-if (Buffer.from(PUBLIC_KEY, "hex").length !== 32) throw new Error("PUBLIC_KEY must be a 32 byte hex string");
+if (!PUBLIC_KEYS.length) throw new Error("PUBLIC_KEY is required");
+for ( const publicKey of PUBLIC_KEYS ) {
+    if (Buffer.from(publicKey, "hex").length !== 32) throw new Error("PUBLIC_KEY must be a 32 byte hex string");
+}
 if (!Number.isInteger(PORT)) throw new Error("PORT must be an integer");

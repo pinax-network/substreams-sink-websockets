@@ -2,7 +2,7 @@ import * as sqlite from "../sqlite.js";
 import { DEFAULT_RECENT_MESSAGES_LIMIT, RECENT_MESSAGES_LIMIT } from "../config.js";
 import Database from "bun:sqlite";
 import { db } from "../../index.js";
-import { toJSON, toText } from "./cors.js";
+import { toJSON } from "./cors.js";
 
 export function parseLimit(searchParams: URLSearchParams) {
     const value = searchParams.get("limit");
@@ -34,28 +34,28 @@ export function handleMessages(req: Request) {
     //console.log(messages)
 }
 
-export function insertMessages(db: Database, traceId: string, timestamp: string, chain?: string) {
+export function insertMessages(db: Database, traceId: string, text: string, chain?: string) {
     const dbLength = sqlite.count(db, "messages");
 
     if (dbLength >= RECENT_MESSAGES_LIMIT) {
         let oldest = sqlite.selectAll(db, "messages").sort((a: any, b: any) => a.timestamp - b.timestamp)[0];
 
         // update messages
-        sqlite.replaceRecent(db, "messages", String(Date.now()), `${traceId}`, timestamp);
+        sqlite.replaceRecent(db, "messages", String(Date.now()), `${traceId}`, text);
         sqlite.deleteRow(db, "messages", oldest.key);
 
         // update messagesByChain
         if (chain) {
             oldest = sqlite.selectAll(db, "messagesByChain").sort((a: any, b: any) => a.timestamp - b.timestamp)[0];
-            sqlite.replaceRecent(db, "messagesByChain", String(Date.now()), `${chain}:${traceId}`, timestamp );
+            sqlite.replaceRecent(db, "messagesByChain", String(Date.now()), `${chain}:${traceId}`, text );
             sqlite.deleteRow(db, "messagesByChain", `${oldest.key}`);
         }
         return;
     }
     // add messages if tables not full
-    sqlite.replaceRecent(db, "messages", String(Date.now()), `${traceId}`, timestamp);
+    sqlite.replaceRecent(db, "messages", String(Date.now()), `${traceId}`, text);
 
-    if (chain) sqlite.replaceRecent(db, "messagesByChain", String(Date.now()), `${chain}:${traceId}`, timestamp );
+    if (chain) sqlite.replaceRecent(db, "messagesByChain", String(Date.now()), `${chain}:${traceId}`, text );
 }
 
 export function selectMessages(db: Database, limit: number, sortBy: string, chain?: string, moduleHash?: string,) {
