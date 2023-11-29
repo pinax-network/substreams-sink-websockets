@@ -6,7 +6,7 @@
   "homepage": "https://github.com/pinax-network/substreams-sink-websockets",
   "type": "module",
   "scripts": {
-    "start": "bun run index.ts",
+    "start": "bun run index.ts --help",
     "test": "bun test",
     "build": "bun build --compile ./index.ts --outfile substreams-sink-websockets",
     "dev": "bun run --watch index.ts"

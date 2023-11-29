@@ -110,13 +110,14 @@ Usage: substreams-sink-websockets [options]
 Substreams Sink Websockets
 
 Options:
-  --public-key <string>       (required) Ed25519 public key (env: PUBLIC_KEY)
-  --port <int>                Server listen on HTTP port (default: 3000, env: PORT)
-  --hostname <string>         Server listen on HTTP hostname (default: "0.0.0.0", env: HOSTNAME)
-  --sqlite-filename <string>  SQLite database filename (default: "db.sqlite", env: SQLITE_FILENAME)
-  --verbose <boolean>         Enable verbose logging (default: false, env: VERBOSE)
-  -V, --version               output the version number
-  -h, --help                  display help for command
+  --public-key <string>          (required) Ed25519 public key (comma-separated for multiple public keys) (env: PUBLIC_KEY)
+  --port <int>                   Server listen on HTTP port (default: 3000, env: PORT)
+  --hostname <string>            Server listen on HTTP hostname (default: "0.0.0.0", env: HOSTNAME)
+  --sqlite-filename <string>     SQLite database filename (default: "db.sqlite", env: SQLITE_FILENAME)
+  --verbose <boolean>            Enable verbose logging (default: false, env: VERBOSE)
+  --recent-messages-limit <int>  Limit recent messages (default: 50, env: RECENT_MESSAGES_LIMIT)
+  -V, --version                  output the version number
+  -h, --help                     display help for command
 ```
 
 ## Docker environment
