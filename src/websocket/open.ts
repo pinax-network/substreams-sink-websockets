@@ -2,7 +2,7 @@ import { ServerWebSocket } from "bun";
 import { logger } from "../logger.js";
 import { ServerWebSocketData } from "../../index.js";
 import * as prometheus from "../prometheus.js";
-import { increment, select, replaceTime, replace } from "../sqlite.js";
+import { increment, select, replace } from "../sqlite.js";
 import { db } from "../../index.js";
 
 function checkLimit(limitData: any, ws: ServerWebSocket<ServerWebSocketData>) {
@@ -21,7 +21,7 @@ function checkLimit(limitData: any, ws: ServerWebSocket<ServerWebSocketData>) {
         return increment(db, "connection", ws.remoteAddress, 1, limitData[0].timestamp);
     }
     // If timestamp is more than 5 minutes ago, reset timestamp & counter to 1
-    return replaceTime(db, "connection", ws.remoteAddress, 1, Date.now());
+    return replace(db, "connection", ws.remoteAddress, 1, "timestamp", Date.now());
 }
 
 export default function (ws: ServerWebSocket<ServerWebSocketData>) {

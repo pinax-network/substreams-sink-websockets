@@ -41,29 +41,29 @@ export function insertMessages(db: Database, traceId: string, text: string, chai
         let oldest = sqlite.selectAll(db, "messages").sort((a: any, b: any) => a.timestamp - b.timestamp)[0];
 
         // update messages
-        sqlite.replaceRecent(db, "messages", String(Date.now()), `${traceId}`, text);
+        sqlite.replace(db, "messages", String(Date.now()), `${traceId}`, "payload", text);
         sqlite.deleteRow(db, "messages", oldest.key);
 
         // update messagesByChain
         if (chain) {
             oldest = sqlite.selectAll(db, "messagesByChain").sort((a: any, b: any) => a.timestamp - b.timestamp)[0];
-            sqlite.replaceRecent(db, "messagesByChain", String(Date.now()), `${chain}:${traceId}`, text );
+            sqlite.replace(db, "messagesByChain", String(Date.now()), `${chain}:${traceId}`, "payload", text );
             sqlite.deleteRow(db, "messagesByChain", `${oldest.key}`);
         }
         return;
     }
     // add messages if tables not full
-    sqlite.replaceRecent(db, "messages", String(Date.now()), `${traceId}`, text);
+    sqlite.replace(db, "messages", String(Date.now()), `${traceId}`, "payload", text);
 
-    if (chain) sqlite.replaceRecent(db, "messagesByChain", String(Date.now()), `${chain}:${traceId}`, text );
+    if (chain) sqlite.replace(db, "messagesByChain", String(Date.now()), `${chain}:${traceId}`, "payload", text );
 }
 
 export function selectMessages(db: Database, limit: number, sortBy: string, chain?: string, moduleHash?: string,) {
 
-    let messages = sqlite.selectAllRecent(db,  "messages", "*", sortBy, limit);
+    let messages = sqlite.selectAll(db,  "messages", "*", sortBy, limit);
 
     // if (distinct) messages = selectDistinct(distinct, messages, db, chain, sortBy, limit);
-    if (chain) messages = sqlite.selectAllRecent(db, "messagesByChain", "*", sortBy, limit).filter((message: any) => message.value.includes(chain));
+    if (chain) messages = sqlite.selectAll(db, "messagesByChain", "*", sortBy, limit).filter((message: any) => message.value.includes(chain));
     if (moduleHash) messages = messages.filter((message: any) => message.value.includes(moduleHash));
     return messages
 }

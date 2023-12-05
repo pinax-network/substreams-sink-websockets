@@ -3,6 +3,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 export type KV = {
+    payload: string;
     timestamp: number,key: string, value: string|number
 };
 
@@ -19,44 +20,26 @@ export function createDb(filename: string) {
     create(db, "moduleHashByChain");
     create(db, "traceId");
     create(db, "chain");
-    createTime(db, "connection");
-    createRecent(db, "messages")
-    createRecent(db, "messagesByChain")
+    create(db, "connection", "timestamp INTEGER");
+    create(db, "messages", "payload TEXT")
+    create(db, "messagesByChain")
     return db;
 }
 
-export function create(db: Database, table: string) {
+export function create(db: Database, table: string, type?: string) {
     if ( !table ) throw new Error("table is required");
-    return db.run(`CREATE TABLE IF NOT EXISTS ${table} (key TEXT PRIMARY KEY, value TEXT)`);
+    if ( !type )   return db.run(`CREATE TABLE IF NOT EXISTS ${table} (key TEXT PRIMARY KEY, value TEXT)`);
+    return db.run(`CREATE TABLE IF NOT EXISTS ${table} (key TEXT PRIMARY KEY, value TEXT, ${type})`);
 }
 
-export function createTime(db: Database, table: string) {
-    if ( !table ) throw new Error("table is required");
-    return db.run(`CREATE TABLE IF NOT EXISTS ${table} (key TEXT PRIMARY KEY, value TEXT, timestamp INTEGER)`);
+export function replace(db: Database, table: string, key: string, value: string|number, type?: string, payload?: string|number) {
+    if ( !type && !payload ) return db.prepare(`REPLACE INTO ${table} (key, value) VALUES (?, ?)`).run(key, value);
+    return db.prepare(`REPLACE INTO ${table} (key, value, ${type}) VALUES (?, ?, ?)`).run(key, value, payload);
 }
 
-export function createRecent(db: Database, table: string) {
-    if ( !table ) throw new Error("table is required");
-    return db.run(`CREATE TABLE IF NOT EXISTS ${table} (key TEXT PRIMARY KEY, value TEXT, payload TEXT)`);
-}
 
-export function replace(db: Database, table: string, key: string, value: string|number) {
-    return db.prepare(`REPLACE INTO ${table} (key, value) VALUES (?, ?)`).run(key, value);
-}
-
-export function replaceTime(db: Database, table: string, key: string, value: string|number, timestamp: string|number) {
-    return db.prepare(`REPLACE INTO ${table} (key, value, timestamp) VALUES (?, ?, ?)`).run(key, value, timestamp);
-}
-
-export function replaceRecent(db: Database, table: string, key: string, value: string|number, payload: string|number) {
-    return db.prepare(`REPLACE INTO ${table} (key, value, payload) VALUES (?, ?, ?)`).run(key, value, payload);
-}
-
-export function selectAll(db: Database, table: string) {
-    return db.query(`SELECT * FROM ${table}`).all() as KV[];
-}
-
-export function selectAllRecent(db: Database, table: string, distinct: string, order: string, limit: number) {
+export function selectAll(db: Database, table: string, distinct?: string, order?: string, limit?: number) {
+    if ( !distinct && !order && !limit ) return db.query(`SELECT * FROM ${table}`).all() as KV[];
     return db.query(`SELECT ${distinct} FROM ${table} ORDER BY key ${order} LIMIT ${limit}`).all() as KV[];
 }
 
@@ -83,8 +66,6 @@ export function increment(db: Database, table: string, key: string, value: numbe
 export function deleteRow(db: Database, table: string, key: string) {
     return db.prepare(`DELETE FROM ${table} WHERE key = ?`).run(key);
 }
-
-
 
 // TO-DO: UPDATE (increment/decrement)
 // UPDATE product SET price = price + 50 WHERE id = 1

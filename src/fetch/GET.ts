@@ -7,7 +7,7 @@ import openapi from "./openapi.js";
 import swaggerHtml  from "../../swagger/index.html"
 import swaggerFavicon from "../../swagger/favicon.png"
 import { toFile, toJSON, toText } from "./cors.js";
-import { handleMessages } from "./messages.js";
+import { handleMessages, selectMessages } from "./messages.js";
 import { checkHealth } from "./health.js";
 
 export default async function (req: Request, server: Server) {
@@ -18,6 +18,7 @@ export default async function (req: Request, server: Server) {
     const key = req.headers.get("sec-websocket-key")
     const chain = searchParams.get("chain")
     const moduleHash = searchParams.get("moduleHash");
+    const payload = JSON.parse(selectMessages(db, 1, "desc", searchParams.get("chain"), searchParams.get("moduleHash"))[0].payload)
     const success = server.upgrade(req, {data: {key, chain, moduleHash}});
     if (success) {
         logger.info('upgrade', {key, chain, moduleHash});
@@ -34,6 +35,7 @@ export default async function (req: Request, server: Server) {
     if ( pathname === "/chain") return toJSON(sqlite.selectAll(db, "chain"));
     if ( pathname === "/openapi") return toJSON(openapi);
     if ( pathname === "/messages") return handleMessages(req);
+    if ( pathname === "/cursor/latest") return toText(payload.cursor);
 
     return toText("Not found", 400 );
 }
