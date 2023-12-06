@@ -26,7 +26,6 @@ export function handleMessages(req: Request) {
     const sort = parseSort(searchParams);
     const chain = searchParams.get("chain")
     const moduleHash = searchParams.get("moduleHash");
-
     // // error handling
     // if (distinct !== "true" && distinct !== null) return toText("distinct must be set to true if declared", 400 );
     // if (distinct === "true" && chain) return toText("chain cannot be set if distinct is set to true", 400 );
@@ -34,28 +33,28 @@ export function handleMessages(req: Request) {
     //console.log(messages)
 }
 
-export function insertMessages(db: Database, traceId: string, text: string, chain?: string) {
+export function insertMessages(db: Database, moduleHash: string, text: string, chain?: string) {
     const dbLength = sqlite.count(db, "messages");
 
     if (dbLength >= RECENT_MESSAGES_LIMIT) {
         let oldest = sqlite.selectAll(db, "messages").sort((a: any, b: any) => a.timestamp - b.timestamp)[0];
 
         // update messages
-        sqlite.replace(db, "messages", String(Date.now()), `${traceId}`, "payload", text);
+        sqlite.replace(db, "messages", String(Date.now()), `${moduleHash}`, "payload", text);
         sqlite.deleteRow(db, "messages", oldest.key);
 
         // update messagesByChain
         if (chain) {
             oldest = sqlite.selectAll(db, "messagesByChain").sort((a: any, b: any) => a.timestamp - b.timestamp)[0];
-            sqlite.replace(db, "messagesByChain", String(Date.now()), `${chain}:${traceId}`, "payload", text );
+            sqlite.replace(db, "messagesByChain", String(Date.now()), `${chain}:${moduleHash}`, "payload", text );
             sqlite.deleteRow(db, "messagesByChain", `${oldest.key}`);
         }
         return;
     }
     // add messages if tables not full
-    sqlite.replace(db, "messages", String(Date.now()), `${traceId}`, "payload", text);
+    sqlite.replace(db, "messages", String(Date.now()), `${moduleHash}`, "payload", text);
 
-    if (chain) sqlite.replace(db, "messagesByChain", String(Date.now()), `${chain}:${traceId}`, "payload", text );
+    if (chain) sqlite.replace(db, "messagesByChain", String(Date.now()), `${chain}:${moduleHash}`, "payload", text );
 }
 
 export function selectMessages(db: Database, limit: number, sortBy: string, chain?: string, moduleHash?: string,) {
@@ -64,7 +63,9 @@ export function selectMessages(db: Database, limit: number, sortBy: string, chai
 
     // if (distinct) messages = selectDistinct(distinct, messages, db, chain, sortBy, limit);
     if (chain) messages = sqlite.selectAll(db, "messagesByChain", "*", sortBy, limit).filter((message: any) => message.value.includes(chain));
+    console.log(messages)
     if (moduleHash) messages = messages.filter((message: any) => message.value.includes(moduleHash));
+    console.log(messages)
     return messages
 }
 

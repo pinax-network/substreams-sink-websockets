@@ -60,7 +60,7 @@ export default async function (req: Request, server: Server) {
         sqlite.replace(db, "traceId", `${chain}:${traceId}`, timestamp);
 
         // Set timestamp as key to filter recent messages
-        insertMessages( db, traceId, text, chain );
+        insertMessages( db, moduleHash, text, chain );
 
         return toText("OK");
     }
