@@ -22,7 +22,7 @@ export function createDb(filename: string) {
     create(db, "chain");
     create(db, "connection", "timestamp INTEGER");
     create(db, "messages", "payload TEXT")
-    create(db, "messagesByChain")
+    create(db, "messagesByChain", "payload TEXT")
     return db;
 }
 

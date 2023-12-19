@@ -17,7 +17,7 @@ export default async function (req: Request, server: Server) {
   // parse POST body payload
   try {
     // prometheus.requests.inc();
-    const body = BodySchema.parse(JSON.parse(text));
+    const body = JSON.parse(text);
 
     // PING
     if ("message" in body) {
@@ -55,6 +55,7 @@ export default async function (req: Request, server: Server) {
 
         // Upsert moduleHash into SQLite DB
         sqlite.replace(db, "chain", chain, timestamp);
+        console.log("moduleHash", moduleHash)
         sqlite.replace(db, "moduleHash", moduleHash, timestamp);
         sqlite.replace(db, "moduleHashByChain", `${chain}:${moduleHash}`, timestamp);
         sqlite.replace(db, "traceId", `${chain}:${traceId}`, timestamp);
@@ -66,6 +67,7 @@ export default async function (req: Request, server: Server) {
     }
   } catch (err) {
     logger.error(err);
+    console.log(err)
     // prometheus.request_errors?.inc();
     prometheus.webhook_message_received_errors.inc(1);
     return toText("invalid request", 400);
