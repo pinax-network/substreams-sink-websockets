@@ -5,6 +5,7 @@ import { parseMessage } from "./parseMessage.js";
 import ping from "./ping.js";
 import time from "./time.js";
 import subscribe from "./subscribe.js";
+import unsubscribe from "./unsubscribe.js";
 import * as prometheus from "../prometheus.js";
 
 export default function (ws: ServerWebSocket<ServerWebSocketData>, message: string|Buffer) {
@@ -15,6 +16,7 @@ export default function (ws: ServerWebSocket<ServerWebSocketData>, message: stri
         if ( method === "ping" ) return ping(ws, id);
         if ( method === "time" ) return time(ws, id);
         if ( method === "subscribe" ) return subscribe(ws, params, id);
+        if ( method === "unsubscribe" ) return unsubscribe(ws, params, id);
     } catch (e) {
         // handle errors
         logger.error(e);

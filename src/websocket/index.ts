@@ -1,6 +1,7 @@
 export {default as ping} from "./ping.js"
 export {default as time} from "./time.js"
 export {default as subscribe} from "./subscribe.js"
+export {default as unsubscribe} from "./unsubscribe.js"
 export {default as open} from "./open.js"
 export {default as close} from "./close.js"
 export {default as message} from "./message.js"
