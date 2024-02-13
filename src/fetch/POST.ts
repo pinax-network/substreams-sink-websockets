@@ -6,7 +6,6 @@ import { Server } from "bun";
 import { toText } from "./cors.js";
 import { insertMessages } from "./messages.js";
 import { signatureEd25519 } from "../webhook/singatureEd25519.js";
-import { BodySchema } from "substreams-sink-webhook/auth";
 
 export default async function (req: Request, server: Server) {
   // validate Ed25519 signature

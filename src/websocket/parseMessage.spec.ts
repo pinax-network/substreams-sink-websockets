@@ -31,10 +31,10 @@ test("parseMessage - ping", () => {
         "method": "ping"
     }`)).toBeTruthy();
 
-    expect(parseMessage(`{
+    expect(Number(parseMessage(`{
         "id": 123,
         "method": "ping"
-    }`).id).toBe(123);
+    }`).id)).toBe(123);
 });
 
 test("parseMessage - time", () => {
@@ -42,10 +42,10 @@ test("parseMessage - time", () => {
         "method": "time"
     }`)).toBeTruthy();
 
-    expect(parseMessage(`{
+    expect(Number(parseMessage(`{
         "id": 123,
         "method": "time"
-    }`).id).toBe(123);
+    }`).id)).toBe(123);
 });
 
 test("parseMessage - Missing required 'method' in JSON request.", () => {
