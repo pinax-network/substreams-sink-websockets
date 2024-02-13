@@ -1,12 +1,12 @@
 {
   "private": true,
-  "version": "0.1.10",
+  "version": "0.2.0",
   "description": "Substreams Sink Websockets",
   "name": "substreams-sink-websockets",
   "homepage": "https://github.com/pinax-network/substreams-sink-websockets",
   "type": "module",
   "scripts": {
-    "start": "bun run index.ts --help",
+    "start": "bun run index.ts",
     "test": "bun test",
     "build": "bun build --compile ./index.ts --outfile substreams-sink-websockets",
     "dev": "bun run --watch index.ts"
@@ -16,12 +16,11 @@
     "dotenv": "latest",
     "openapi3-ts": "latest",
     "prom-client": "latest",
-    "substreams-sink-webhook": "^0.7.2",
-    "tslog": "latest",
-    "tweetnacl": "latest"
+    "substreams-sink-webhook": "^0.8",
+    "tslog": "latest"
   },
   "devDependencies": {
-    "bun-types": "latest",
+    "@types/bun": "latest",
     "typescript": "latest"
   }
 }
